@@ -24,7 +24,26 @@ class Domino:
 
 ALL_DOMINOS = [Domino(*p) for p in product(PolarizingFilter, PolarizingFilter, DominoOrientation)]
 
-
 @dataclass
+class PlacedDomino:
+    domino: Domino
+    i: int
+    j: int
+
 class Board:
-    values: np.ndarray
+    def __init__(self, *placed_dominos):
+        self.placed_dominos = placed_dominos
+        self.values = np.zeros((4, 4), dtype=np.int8)
+        for placed_domino in placed_dominos:
+            self._add_domino(placed_domino)
+
+
+    def _add_domino(self, placed_domino):
+        domino = placed_domino.domino
+        i = placed_domino.i
+        j = placed_domino.j
+        self.values[i, j] = domino.filter1.value
+        if domino.orientation == DominoOrientation.HORIZONTAL:
+            self.values[i + 1, j] = domino.filter2.value
+        else:
+            self.values[i, j + 1] = domino.filter2.value
