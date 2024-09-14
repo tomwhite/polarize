@@ -22,28 +22,56 @@ class Domino:
     filter2: PolarizingFilter
     orientation: DominoOrientation
 
-ALL_DOMINOS = [Domino(*p) for p in product(PolarizingFilter, PolarizingFilter, DominoOrientation)]
+    def places(self, n=4):
+        # return y, x values of where this domino can be placed on a board
+        if self.orientation == DominoOrientation.HORIZONTAL:
+            x_max, y_max = n - 1, n
+        else:
+            x_max, y_max = n, n - 1
+        return product(range(y_max), range(x_max))
+
+    @property
+    def value(self):
+        return ((self.orientation.value - 1) << 2) | ((self.filter2.value - 1) << 1) | (self.filter1.value - 1)
+
+ALL_DOMINOES = [Domino(*p) for p in product(PolarizingFilter, PolarizingFilter, DominoOrientation)]
 
 @dataclass
 class PlacedDomino:
     domino: Domino
-    i: int
-    j: int
+    x: int  # across
+    y: int  # down
 
 class Board:
-    def __init__(self, *placed_dominos):
-        self.placed_dominos = placed_dominos
+    def __init__(self, *placed_dominoes):
         self.values = np.zeros((4, 4), dtype=np.int8)
-        for placed_domino in placed_dominos:
-            self._add_domino(placed_domino)
+        self.n = 4  # assume board of size 4
+        for placed_domino in placed_dominoes:
+            self.add_domino(placed_domino)
 
 
-    def _add_domino(self, placed_domino):
+    def add_domino(self, placed_domino):
         domino = placed_domino.domino
-        i = placed_domino.i
-        j = placed_domino.j
-        self.values[i, j] = domino.filter1.value
+        x, y = placed_domino.x, placed_domino.y
+        self.values[y, x] = domino.filter1.value
         if domino.orientation == DominoOrientation.HORIZONTAL:
-            self.values[i + 1, j] = domino.filter2.value
+            x2, y2 = x + 1, y
         else:
-            self.values[i, j + 1] = domino.filter2.value
+            x2, y2 = x, y + 1
+        self.values[y2, x2] = domino.filter2.value
+
+    def can_add(self, placed_domino):
+        if self.values[y, x] != 0:
+            return False
+        if domino.orientation == DominoOrientation.HORIZONTAL:
+            x2, y2 = x + 1, y
+        else:
+            x2, y2 = x, y + 1
+        return self.values[y2, x2] == 0
+
+    def on_board(self, x, y):
+        """Return True if x, y is on the inner board (not outer edge or corners)"""
+        return 0 < x <= self.n and 0 < y <= self.n
+
+    def __str__(self):
+        return str(self.values)
