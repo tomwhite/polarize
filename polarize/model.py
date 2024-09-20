@@ -3,6 +3,7 @@ from enum import Enum
 from itertools import product
 
 import numpy as np
+from rich.text import Text
 
 class PolarizingFilter(Enum):
     def __new__(cls, value, char):
@@ -81,4 +82,19 @@ class Board:
         return 0 < x <= self.n and 0 < y <= self.n
 
     def __str__(self):
-        return str(self.colours)
+        return str(self.values)
+
+    def to_rich(self):
+        text = Text()
+        for y in range(4):
+            for x in range(4):
+                v = self.values[y, x]
+                c = self.colours[y, x]
+                if v == 0:
+                    text.append(".")
+                else:
+                    text.append(PolarizingFilter(v).char, style=f"color({c})")
+            text.append("\n")
+        # text.append("Hello", style="bold magenta")
+        # text.append(" World!")
+        return text

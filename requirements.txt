@@ -2,3 +2,4 @@ numba
 numpy
 pytest
 pytest-cov
+rich
