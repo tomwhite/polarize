@@ -16,7 +16,7 @@ class PolarizingFilter(Enum):
 
 DominoOrientation = Enum("DominoOrientation", ["HORIZONTAL", "VERTICAL"])
 
-@dataclass
+@dataclass(frozen=True)
 class Domino:
     filter1: PolarizingFilter
     filter2: PolarizingFilter
@@ -36,7 +36,7 @@ class Domino:
 
 ALL_DOMINOES = [Domino(*p) for p in product(PolarizingFilter, PolarizingFilter, DominoOrientation)]
 
-@dataclass
+@dataclass(frozen=True)
 class PlacedDomino:
     domino: Domino
     x: int  # across
@@ -61,8 +61,10 @@ class Board:
         self.values[y2, x2] = domino.filter2.value
 
     def can_add(self, placed_domino):
+        x, y = placed_domino.x, placed_domino.y
         if self.values[y, x] != 0:
             return False
+        domino = placed_domino.domino
         if domino.orientation == DominoOrientation.HORIZONTAL:
             x2, y2 = x + 1, y
         else:
