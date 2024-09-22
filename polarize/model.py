@@ -81,6 +81,13 @@ class Board:
         """Return True if x, y is on the inner board (not outer edge or corners)"""
         return 0 < x <= self.n and 0 < y <= self.n
 
+    def lights(self):
+        hi = np.bitwise_or.reduce(self.values, axis=0) == 3
+        hi = np.astype(hi, np.uint8)
+        lo = np.bitwise_or.reduce(self.values, axis=1) == 3
+        lo = np.astype(lo, np.uint8)
+        return hi[3] << 7 | hi[2] << 6 | hi[1] << 5 | hi[0] << 4 | lo[3] << 3 | lo[2] << 2 | lo[1] << 1 | lo[0]
+
     def __str__(self):
         return str(self.values)
 

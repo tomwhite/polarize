@@ -14,6 +14,5 @@ def test_board():
     )
     print(board)
 
-    print(np.bitwise_or.reduce(board.values, axis=1) == 3)
-    print(np.bitwise_or.reduce(board.values, axis=0) == 3)
+    print(board.lights())
 
