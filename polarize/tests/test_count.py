@@ -3,8 +3,10 @@ import numpy as np
 from polarize.count import all_boards
 from polarize.model import ALL_DOMINOES
 
+
 def test_all_boards():
     from rich.console import Console
+
     console = Console()
 
     dominoes = [ALL_DOMINOES[0], ALL_DOMINOES[3]]

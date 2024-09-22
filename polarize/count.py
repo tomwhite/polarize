@@ -1,9 +1,9 @@
 from itertools import permutations, product
 
-from polarize.model import Board, DominoOrientation, PlacedDomino
+from polarize.model import Board, PlacedDomino
+
 
 def all_boards(dominoes):
-
     def coord_lt(coord1, coord2):
         y1, x1 = coord1
         y2, x2 = coord2

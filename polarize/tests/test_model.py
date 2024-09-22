@@ -1,8 +1,7 @@
-import numpy as np
-
 from rich.console import Console
 
-from polarize.model import Board, Domino, DominoOrientation, PlacedDomino, PolarizingFilter, ALL_DOMINOES
+from polarize.model import Board, PlacedDomino, ALL_DOMINOES
+
 
 def test_domino():
     for domino in ALL_DOMINOES:

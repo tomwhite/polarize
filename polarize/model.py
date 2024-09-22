@@ -7,6 +7,7 @@ from rich.text import Text
 
 BLOCK = "\u2588"
 
+
 class PolarizingFilter(Enum):
     def __new__(cls, value, char):
         obj = object.__new__(cls)
@@ -17,7 +18,9 @@ class PolarizingFilter(Enum):
     POS_45 = (1, "/")
     NEG_45 = (2, "\\")
 
+
 DominoOrientation = Enum("DominoOrientation", ["HORIZONTAL", "VERTICAL"])
+
 
 @dataclass(frozen=True)
 class Domino:
@@ -35,7 +38,11 @@ class Domino:
 
     @property
     def value(self):
-        return ((self.orientation.value - 1) << 2) | ((self.filter2.value - 1) << 1) | (self.filter1.value - 1)
+        return (
+            ((self.orientation.value - 1) << 2)
+            | ((self.filter2.value - 1) << 1)
+            | (self.filter1.value - 1)
+        )
 
     def __str__(self):
         if self.orientation == DominoOrientation.HORIZONTAL:
@@ -44,7 +51,9 @@ class Domino:
             return f"{self.filter1.char}\n{self.filter2.char}"
 
 
-ALL_DOMINOES = [Domino(*p) for p in product(PolarizingFilter, PolarizingFilter, DominoOrientation)]
+ALL_DOMINOES = [
+    Domino(*p) for p in product(PolarizingFilter, PolarizingFilter, DominoOrientation)
+]
 
 
 class Puzzle:
@@ -55,10 +64,8 @@ class Puzzle:
         self.lights = lights
         self.dominoes = dominoes
 
-
     def __str__(self):
         return f"{self.lights:08b}, {self.dominoes}"
-
 
     def __rich__(self):
         text = Text()
@@ -92,6 +99,7 @@ class PlacedDomino:
     x: int  # across
     y: int  # down
 
+
 class Board:
     """A Polarize board consists of a set of placed dominoes."""
 
@@ -103,7 +111,6 @@ class Board:
         self.placed_dominoes = placed_dominoes
         for placed_domino in placed_dominoes:
             self.add_domino(placed_domino)
-
 
     def add_domino(self, placed_domino):
         domino = placed_domino.domino
@@ -138,7 +145,16 @@ class Board:
         hi = np.astype(hi, np.uint8)
         lo = np.bitwise_or.reduce(self.values, axis=1) == 3
         lo = np.astype(lo, np.uint8)
-        return lo[0] << 7 | lo[1] << 6 | lo[2] << 5 | lo[3] << 4 | hi[0] << 3 | hi[1] << 2 | hi[2] << 1 | hi[3]
+        return (
+            lo[0] << 7
+            | lo[1] << 6
+            | lo[2] << 5
+            | lo[3] << 4
+            | hi[0] << 3
+            | hi[1] << 2
+            | hi[2] << 1
+            | hi[3]
+        )
 
     def to_puzzle(self):
         dominoes = [pd.domino for pd in self.placed_dominoes]
