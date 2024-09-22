@@ -37,6 +37,13 @@ class Domino:
     def value(self):
         return ((self.orientation.value - 1) << 2) | ((self.filter2.value - 1) << 1) | (self.filter1.value - 1)
 
+    def __str__(self):
+        if self.orientation == DominoOrientation.HORIZONTAL:
+            return f"{self.filter1.char}{self.filter2.char}"
+        else:
+            return f"{self.filter1.char}\n{self.filter2.char}"
+
+
 ALL_DOMINOES = [Domino(*p) for p in product(PolarizingFilter, PolarizingFilter, DominoOrientation)]
 
 
@@ -74,7 +81,8 @@ class Puzzle:
                     text.append(" ")
             text.append("\n")
         for i, domino in enumerate(self.dominoes):
-            text.append("[domino]\n", style=f"color({i})")
+            text.append(str(domino), style=f"reverse color({i})")
+            text.append("\n")
         return text
 
 
