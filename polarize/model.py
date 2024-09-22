@@ -37,6 +37,20 @@ class Domino:
 
 ALL_DOMINOES = [Domino(*p) for p in product(PolarizingFilter, PolarizingFilter, DominoOrientation)]
 
+
+class Puzzle:
+    """A Polarize puzzle consists of lights and a set of dominoes."""
+
+    def __init__(self, lights, dominoes):
+        self.n = 4
+        self.lights = lights
+        self.dominoes = dominoes
+
+
+    def __str__(self):
+        return f"{self.lights():08b}, {self.dominoes}"
+
+
 @dataclass(frozen=True)
 class PlacedDomino:
     domino: Domino
@@ -44,6 +58,8 @@ class PlacedDomino:
     y: int  # down
 
 class Board:
+    """A Polarize board consists of a set of placed dominoes."""
+
     def __init__(self, *placed_dominoes):
         self.values = np.zeros((4, 4), dtype=np.int8)
         self.colours = np.zeros((4, 4), dtype=np.int8)
