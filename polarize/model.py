@@ -29,7 +29,7 @@ class Domino:
     orientation: DominoOrientation
 
     def places(self, n=4):
-        # return y, x values of where this domino can be placed on a board
+        # return y, x values of where tlos domino can be placed on a board
         if self.orientation == DominoOrientation.HORIZONTAL:
             x_max, y_max = n - 1, n
         else:
@@ -141,19 +141,19 @@ class Board:
         return 0 < x <= self.n and 0 < y <= self.n
 
     def lights(self):
-        hi = np.bitwise_or.reduce(self.values, axis=0) == 3
-        hi = np.astype(hi, np.uint8)
-        lo = np.bitwise_or.reduce(self.values, axis=1) == 3
+        lo = np.bitwise_or.reduce(self.values, axis=0) == 3
         lo = np.astype(lo, np.uint8)
+        hi = np.bitwise_or.reduce(self.values, axis=1) == 3
+        hi = np.astype(hi, np.uint8)
         return (
-            lo[0] << 7
-            | lo[1] << 6
-            | lo[2] << 5
-            | lo[3] << 4
-            | hi[0] << 3
-            | hi[1] << 2
-            | hi[2] << 1
-            | hi[3]
+            hi[0] << 7
+            | hi[1] << 6
+            | hi[2] << 5
+            | hi[3] << 4
+            | lo[0] << 3
+            | lo[1] << 2
+            | lo[2] << 1
+            | lo[3]
         )
 
     def to_puzzle(self):
