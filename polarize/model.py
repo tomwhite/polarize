@@ -65,6 +65,7 @@ class Board:
         self.colours = np.zeros((4, 4), dtype=np.int8)
         self.n = 4  # assume board of size 4
         self.n_dominoes = 0
+        self.placed_dominoes = placed_dominoes
         for placed_domino in placed_dominoes:
             self.add_domino(placed_domino)
 
@@ -103,6 +104,10 @@ class Board:
         lo = np.bitwise_or.reduce(self.values, axis=1) == 3
         lo = np.astype(lo, np.uint8)
         return lo[0] << 7 | lo[1] << 6 | lo[2] << 5 | lo[3] << 4 | hi[0] << 3 | hi[1] << 2 | hi[2] << 1 | hi[3]
+
+    def to_puzzle(self):
+        dominoes = [pd.domino for pd in self.placed_dominoes]
+        return Puzzle(self.lights, dominoes)
 
     def __str__(self):
         return str(self.values)

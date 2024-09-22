@@ -16,3 +16,5 @@ def test_board():
 
     print(f"{board.lights()}, {board.lights():08b}")
 
+    puzzle = board.to_puzzle()
+    print(puzzle)
