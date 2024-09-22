@@ -102,6 +102,4 @@ class Board:
                 else:
                     text.append(PolarizingFilter(v).char, style=f"color({c})")
             text.append("\n")
-        # text.append("Hello", style="bold magenta")
-        # text.append(" World!")
         return text
