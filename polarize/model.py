@@ -86,7 +86,7 @@ class Board:
         hi = np.astype(hi, np.uint8)
         lo = np.bitwise_or.reduce(self.values, axis=1) == 3
         lo = np.astype(lo, np.uint8)
-        return hi[3] << 7 | hi[2] << 6 | hi[1] << 5 | hi[0] << 4 | lo[3] << 3 | lo[2] << 2 | lo[1] << 1 | lo[0]
+        return lo[0] << 7 | lo[1] << 6 | lo[2] << 5 | lo[3] << 4 | hi[0] << 3 | hi[1] << 2 | hi[2] << 1 | hi[3]
 
     def __str__(self):
         return str(self.values)

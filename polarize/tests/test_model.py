@@ -9,10 +9,10 @@ def test_domino():
 
 def test_board():
     board = Board(
-        PlacedDomino(ALL_DOMINOES[4], 1, 1),
+        PlacedDomino(ALL_DOMINOES[4], 0, 2),
         PlacedDomino(ALL_DOMINOES[5], 2, 2),
     )
     print(board)
 
-    print(board.lights())
+    print(f"{board.lights()}, {board.lights():08b}")
 
