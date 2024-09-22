@@ -1,5 +1,7 @@
 import numpy as np
 
+from rich.console import Console
+
 from polarize.model import Board, Domino, DominoOrientation, PlacedDomino, PolarizingFilter, ALL_DOMINOES
 
 def test_domino():
@@ -17,4 +19,7 @@ def test_board():
     print(f"{board.lights()}, {board.lights():08b}")
 
     puzzle = board.to_puzzle()
-    print(puzzle)
+
+    console = Console()
+
+    console.print(puzzle)
