@@ -11,7 +11,7 @@ def test_all_boards():
 
     for board in all_boards(dominoes):
         # print(board)
-        console.print(board.to_rich())
+        console.print(board)
         print(board.lights())
 
     boards = list(all_boards(dominoes))
@@ -31,7 +31,7 @@ def test_all_boards():
 
     for ind in np.nonzero(lights == u[-1])[0]:
         board = boards[ind]
-        console.print(board.to_rich())
+        console.print(board)
         print(f"{board.lights():08b}")
 
     # find unique lights
@@ -42,5 +42,5 @@ def test_all_boards():
         assert len(inds) == 1
         ind = inds[0]
         board = boards[ind]
-        console.print(board.to_rich())
+        console.print(board)
         print(f"{board.lights()}, {board.lights():08b}")

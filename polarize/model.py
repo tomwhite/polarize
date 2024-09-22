@@ -112,7 +112,7 @@ class Board:
     def __str__(self):
         return str(self.values)
 
-    def to_rich(self):
+    def __rich__(self):
         text = Text()
         for y in range(4):
             for x in range(4):
