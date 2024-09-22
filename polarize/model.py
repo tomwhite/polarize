@@ -81,7 +81,7 @@ class Puzzle:
                     text.append(" ")
             text.append("\n")
         for i, domino in enumerate(self.dominoes):
-            text.append(str(domino), style=f"reverse color({i})")
+            text.append(str(domino), style=f"reverse color({i + 1})")
             text.append("\n")
         return text
 
