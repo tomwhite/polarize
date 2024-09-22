@@ -71,12 +71,12 @@ class Puzzle:
                     if (li >> (y + 2)) & 1:
                         text.append(BLOCK)
                     else:
-                        text.append(" ")
+                        text.append(BLOCK, style="#ffff00")
                 elif y in (0, 5) and 1 <= x <= 4:
                     if (li >> (4 - x)) & 1:
                         text.append(BLOCK)
                     else:
-                        text.append(" ")
+                        text.append(BLOCK, style="#ffff00")
                 else:
                     text.append(" ")
             text.append("\n")
