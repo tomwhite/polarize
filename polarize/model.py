@@ -55,12 +55,10 @@ class Puzzle:
         text = Text()
         for y in range(6):
             for x in range(6):
-                v = self.values[y, x]
-                c = self.colours[y, x]
                 if 1 <= x <= 4 and 1 <= y <= 4:
                     text.append(".")
                 else:
-                    text.append( )
+                    text.append(" ")
             text.append("\n")
         return text
 
