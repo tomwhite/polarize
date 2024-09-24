@@ -29,7 +29,7 @@ class Domino:
     orientation: DominoOrientation
 
     def places(self, n=4):
-        # return y, x values of where tlos domino can be placed on a board
+        # return y, x values of where this domino can be placed on a board
         if self.orientation == DominoOrientation.HORIZONTAL:
             x_max, y_max = n - 1, n
         else:
