@@ -9,6 +9,7 @@ BLOCK = "\u2588"
 
 
 class PolarizingFilter(Enum):
+    """A polarizing filter with a set orientation."""
     def __new__(cls, value, char):
         obj = object.__new__(cls)
         obj._value_ = value
@@ -24,6 +25,8 @@ DominoOrientation = Enum("DominoOrientation", ["HORIZONTAL", "VERTICAL"])
 
 @dataclass(frozen=True)
 class Domino:
+    """A domino is made up of two polarizing filters, and is oriented either
+    horizontally or vertically."""
     filter1: PolarizingFilter
     filter2: PolarizingFilter
     orientation: DominoOrientation
@@ -95,6 +98,7 @@ class Puzzle:
 
 @dataclass(frozen=True)
 class PlacedDomino:
+    """A domino placed in a fixed position on a board."""
     domino: Domino
     x: int  # across
     y: int  # down
