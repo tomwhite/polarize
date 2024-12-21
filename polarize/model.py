@@ -145,6 +145,7 @@ class Board:
         return 0 < x <= self.n and 0 < y <= self.n
 
     def lights(self):
+        """Return an int encoding the lights, determined by the dominoes placed on this board."""
         lo = np.bitwise_or.reduce(self.values, axis=0) == 3
         lo = np.astype(lo, np.uint8)
         hi = np.bitwise_or.reduce(self.values, axis=1) == 3
