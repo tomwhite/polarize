@@ -12,7 +12,7 @@ if __name__ == "__main__":
         PolarizingFilter.NEG_45: Image.open("sprites/reverse_oblique_mirror_tr.png"),
     }
 
-    for i, domino in enumerate(ALL_DOMINOES):
+    for domino in ALL_DOMINOES:
         if domino.orientation == DominoOrientation.HORIZONTAL:
             im = Image.new("RGB", (64, 32))
             im.paste(images[domino.filter1], (0, 0))
@@ -22,4 +22,4 @@ if __name__ == "__main__":
             im.paste(images[domino.filter1], (0, 0))
             im.paste(images[domino.filter2], (0, 32))
 
-        im.save(f"sprites/domino_{i}_tr.png")
+        im.save(f"sprites/domino_{domino.value}_tr.png")
