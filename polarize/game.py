@@ -7,7 +7,7 @@ from time import time
 
 import arcade
 
-from polarize.model import Board, PlacedDomino, ALL_DOMINOES
+from polarize.model import Board, DominoOrientation, PlacedDomino, ALL_DOMINOES
 
 # Screen title and size
 SCREEN_WIDTH = 240
@@ -47,15 +47,14 @@ COLOURS = [
 ]
 
 
-class BlockSprite(arcade.Sprite):
-    """Block sprite"""
+class DominoSprite(arcade.Sprite):
+    """Domino sprite"""
 
-    def __init__(self, piece, name, scale=1):
-        self.piece = piece
-        self.name = name
+    def __init__(self, domino, scale=1):
+        self.domino = domino
 
         # TODO: need to package these and use :resources: ?
-        self.image_file_name = f"sprites/{self.name}_tr.png"
+        self.image_file_name = f"sprites/domino_{domino.value}_tr.png"
 
         super().__init__(self.image_file_name, scale, hit_box_algorithm="None")
 
@@ -70,7 +69,18 @@ class PolarizePuzzle(arcade.Window):
 
         self.shape_list = None
 
-        self.block_list = None
+        # domino sprites
+        self.domino_list = None
+        self.domino_cells = None
+
+        # domino currently being held (dragged)
+        self.held_domino = None
+        self.held_domino_original_position = None
+
+        # cell sprites
+        self.cell_list = None
+        # dict mapping cell to index on board
+        self.cell_indexes = None
 
         arcade.set_background_color(arcade.color.WHITE)
 
@@ -101,17 +111,41 @@ class PolarizePuzzle(arcade.Window):
             )
             self.shape_list.append(line)
 
-        self.block_list = arcade.SpriteList()
+        self.domino_list = arcade.SpriteList()
+        self.domino_cells = {}
+
+        self.cell_list: arcade.SpriteList = arcade.SpriteList()
+        self.cell_indexes = {}
 
         for i, domino in enumerate(self.puzzle.dominoes):
-            print(i, domino)
+            domino_sprite = DominoSprite(domino)
+            x, y = block_index_to_coord(((2 * i) % 4) + 1, i // 2)
+            y -= 240
+            # correction since we want position to refer to center of first block in domino
+            if domino.orientation == DominoOrientation.HORIZONTAL:
+                x += (32 // 2)
+            else:
+                y -= (32 // 2)
+            domino_sprite.position = x, y
+            self.domino_list.append(domino_sprite)
+            cell = arcade.SpriteSolidColor(
+                CELL_SIZE, CELL_SIZE, arcade.color.ALICE_BLUE
+            )
+            cell.position = domino_sprite.position
+            self.cell_list.append(cell)
+            self.domino_cells[cell] = domino_sprite
+        self.held_domino = None
+        self.held_domnio_original_position = None
 
-        block = BlockSprite(None, "oblique_mirror")
-        x, y = block_index_to_coord((i % 4) + 1, i // 4)
-        y -= 240
-        block.position = x, y
-        self.block_list.append(block)
-
+        for i in range(self.puzzle.n):
+            for j in range(self.puzzle.n):
+                cell = arcade.SpriteSolidColor(
+                    CELL_SIZE, CELL_SIZE, arcade.color.ALICE_BLUE
+                )
+                self.cell_indexes[cell] = (i, j)
+                x, y = block_index_to_coord(i + 1, j + 1)
+                cell.position = x, y
+                self.cell_list.append(cell)
 
     def on_draw(self):
         self.clear()
@@ -119,8 +153,70 @@ class PolarizePuzzle(arcade.Window):
         #     0, flip_y(40), SCREEN_WIDTH, 40, self.background
         # )
         self.shape_list.draw()
+        self.cell_list.draw()
+        self.domino_list.draw()
 
-        self.block_list.draw()
+    def pull_to_top(self, domino: arcade.Sprite):
+        self.domino_list.remove(domino)
+        self.domino_list.append(domino)
+
+    def move_domino_to_cell(self, domino, cell):
+        prev_cell = None
+        for c, d in dict(self.domino_cells).items():
+            if d == domino:
+                prev_cell = c
+                break
+        self.domino_cells.pop(prev_cell)
+        self.domino_cells[cell] = domino
+
+        # update the board
+        if prev_cell in self.cell_indexes:
+            i, j = self.cell_indexes[prev_cell]
+            # TODO
+            # self.board.set_value(i + 1, j + 1, ".")
+
+        if cell in self.cell_indexes:
+            i, j = self.cell_indexes[cell]
+            # TODO
+            # self.board.set_value(i + 1, j + 1, self.held_block.piece)
+
+    def on_mouse_press(self, x, y, button, key_modifiers):
+        dominoes = arcade.get_sprites_at_point((x, y), self.domino_list)
+
+        if len(dominoes) > 0:
+            domino = dominoes[-1]  # they don't overlap, but get top one
+            self.held_domino = domino
+            self.held_domino_original_position = self.held_domino.position
+            self.pull_to_top(self.held_domino)
+
+    def on_mouse_release(self, x: float, y: float, button: int, modifiers: int):
+        if self.held_domino is None:
+            return
+
+        cell, _ = arcade.get_closest_sprite(self.held_domino, self.cell_list)
+        reset_position = True
+        if arcade.check_for_collision(self.held_domino, cell):
+            x = cell.center_x
+            y = cell.center_y
+            # correction since we want position to refer to center of first block in domino
+            if self.held_domino.domino.orientation == DominoOrientation.HORIZONTAL:
+                x += (32 // 2)
+            else:
+                y -= (32 // 2)
+            self.held_domino.position = x, y
+            if cell not in self.domino_cells:  # not occupied
+                self.domino_cells[cell] = self.held_domino
+                self.move_domino_to_cell(self.held_domino, cell)
+                reset_position = False
+        if reset_position:
+            self.held_domino.position = self.held_domino_original_position
+
+        self.held_domino = None
+
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
+        if self.held_domino:
+            self.held_domino.center_x += dx
+            self.held_domino.center_y += dy
 
 def block_index_to_coord(i, j, x_offset=0, y_offset=40):
     x = int(i) * BLOCK_SIZE + BLOCK_SIZE // 2 + x_offset
