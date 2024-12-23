@@ -1,3 +1,4 @@
+arcade
 numba
 numpy
 pytest
