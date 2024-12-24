@@ -103,6 +103,14 @@ class PlacedDomino:
     x: int  # across
     y: int  # down
 
+    @property
+    def np_index(self):
+        x, y = self.x, self.y
+        if self.domino.orientation == DominoOrientation.HORIZONTAL:
+            x2, y2 = x + 1, y
+        else:
+            x2, y2 = x, y + 1
+        return np.array([y, y2]), np.array([x, x2])
 
 class Board:
     """A Polarize board consists of a set of placed dominoes."""
@@ -116,29 +124,14 @@ class Board:
         for placed_domino in placed_dominoes:
             self.add_domino(placed_domino)
 
+    def can_add(self, placed_domino):
+        return np.all(self.values[placed_domino.np_index] == 0)
+
     def add_domino(self, placed_domino):
         domino = placed_domino.domino
-        x, y = placed_domino.x, placed_domino.y
-        self.values[y, x] = domino.filter1.value
-        self.colours[y, x] = self.n_dominoes + 1
-        if domino.orientation == DominoOrientation.HORIZONTAL:
-            x2, y2 = x + 1, y
-        else:
-            x2, y2 = x, y + 1
-        self.values[y2, x2] = domino.filter2.value
-        self.colours[y2, x2] = self.n_dominoes + 1
+        self.values[placed_domino.np_index] = [domino.filter1.value, domino.filter2.value]
+        self.colours[placed_domino.np_index] = self.n_dominoes + 1
         self.n_dominoes += 1
-
-    def can_add(self, placed_domino):
-        x, y = placed_domino.x, placed_domino.y
-        if self.values[y, x] != 0:
-            return False
-        domino = placed_domino.domino
-        if domino.orientation == DominoOrientation.HORIZONTAL:
-            x2, y2 = x + 1, y
-        else:
-            x2, y2 = x, y + 1
-        return self.values[y2, x2] == 0
 
     def on_board(self, x, y):
         """Return True if x, y is on the inner board (not outer edge or corners)"""

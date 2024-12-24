@@ -9,6 +9,22 @@ def test_all_dominoes():
     assert len(ALL_DOMINOES) == 8
 
 
+def test_add_domino():
+    board = Board()
+
+    d1 = PlacedDomino(ALL_DOMINOES[4], 0, 2)
+    d2 = PlacedDomino(ALL_DOMINOES[5], 2, 2)
+
+    assert board.can_add(d1)
+    assert board.can_add(d2)
+    board.add_domino(d1)
+    assert not board.can_add(d1)
+    assert board.can_add(d2)
+    board.add_domino(d2)
+    assert not board.can_add(d1)
+    assert not board.can_add(d2)
+
+
 def test_board_to_puzzle():
     board = Board(
         PlacedDomino(ALL_DOMINOES[4], 0, 2),
