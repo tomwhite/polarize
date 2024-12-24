@@ -216,15 +216,18 @@ class PolarizePuzzle(arcade.Window):
             self.held_domino.position = x, y
             prev_cell = self.get_prev_cell(self.held_domino)
             if cell != prev_cell:
-                print("moved")
+                print("moved", prev_cell, cell)
+    
+                if prev_cell is not None:
+                    self.domino_cells.pop(prev_cell)
+
                 if prev_cell in self.cell_indexes:
                     i, j = self.cell_indexes[prev_cell]
                     print("prev", i, j)
                     placed_domino = PlacedDomino(self.held_domino.domino, i, j)
                     self.board.remove_domino(placed_domino)
 
-                    self.domino_cells.pop(prev_cell)
-
+    
                 if cell in self.cell_indexes:
                     i, j = self.cell_indexes[cell]
                     print("new", i, j)
