@@ -66,6 +66,7 @@ class PolarizePuzzle(arcade.Window):
         self.background = None
 
         self.puzzle = puzzle
+        self.board = Board()
 
         self.shape_list = None
 
@@ -83,6 +84,9 @@ class PolarizePuzzle(arcade.Window):
         self.cell_indexes = None
 
         arcade.set_background_color(arcade.color.WHITE)
+
+        # TODO
+        print(self.board)
 
     def setup(self):
         # self.background = arcade.load_texture("sprites/reflect.png")
@@ -160,6 +164,12 @@ class PolarizePuzzle(arcade.Window):
         self.domino_list.remove(domino)
         self.domino_list.append(domino)
 
+    def get_prev_cell(self, domino):
+        for c, d in dict(self.domino_cells).items():
+            if d == domino:
+                return c
+        return None
+
     def move_domino_to_cell(self, domino, cell):
         prev_cell = None
         for c, d in dict(self.domino_cells).items():
@@ -204,10 +214,27 @@ class PolarizePuzzle(arcade.Window):
             else:
                 y -= (32 // 2)
             self.held_domino.position = x, y
+            prev_cell = self.get_prev_cell(self.held_domino)
+            if cell != prev_cell:
+                print("moved")
+                if prev_cell in self.cell_indexes:
+                    i, j = self.cell_indexes[prev_cell]
+                    print("prev", i, j)
+                if cell in self.cell_indexes:
+                    i, j = self.cell_indexes[cell]
+                    print("new", i, j)
+                    placed_domino = PlacedDomino(self.held_domino.domino, i, j)
+                    self.board.add_domino(placed_domino)
+                    reset_position = False
+
+                # self.domino_cells.pop(prev_cell)
+                # self.domino_cells[cell] = self.held_domino.domino
             if cell not in self.domino_cells:  # not occupied
                 self.domino_cells[cell] = self.held_domino
                 self.move_domino_to_cell(self.held_domino, cell)
                 reset_position = False
+
+                print(self.board)
         if reset_position:
             self.held_domino.position = self.held_domino_original_position
 
