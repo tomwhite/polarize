@@ -125,7 +125,10 @@ class Board:
             self.add_domino(placed_domino)
 
     def can_add(self, placed_domino):
-        return np.all(self.values[placed_domino.np_index] == 0)
+        try:
+            return np.all(self.values[placed_domino.np_index] == 0)
+        except IndexError:
+            return False
 
     def add_domino(self, placed_domino):
         domino = placed_domino.domino
@@ -135,7 +138,10 @@ class Board:
 
     def can_remove(self, placed_domino):
         domino = placed_domino.domino
-        return np.all(self.values[placed_domino.np_index] == [domino.filter1.value, domino.filter2.value])
+        try:
+            return np.all(self.values[placed_domino.np_index] == [domino.filter1.value, domino.filter2.value])
+        except IndexError:
+            return False
 
     def remove_domino(self, placed_domino):
         self.values[placed_domino.np_index] = 0
