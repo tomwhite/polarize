@@ -49,6 +49,7 @@ def test_all_boards():
 
 
 def test_count_puzzles():
+    assert count_puzzles(1) == 0
     assert count_puzzles(2) == 64
     assert count_puzzles(3) == 488
     # assert count_puzzles(4) == 1032
