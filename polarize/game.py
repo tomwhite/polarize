@@ -271,6 +271,9 @@ class PolarizePuzzle(arcade.Window):
             #     reset_position = False
 
                 print(self.board)
+
+                if self.board.lights == self.puzzle.lights:
+                    print("YOU SOLVED IT!")
         if reset_position:
             self.held_domino.position = self.held_domino_original_position
 

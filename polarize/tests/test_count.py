@@ -14,10 +14,10 @@ def test_all_boards():
     for board in all_boards(dominoes):
         # print(board)
         console.print(board)
-        print(board.lights())
+        print(board.lights)
 
     boards = list(all_boards(dominoes))
-    lights = np.asarray([board.lights() for board in boards])
+    lights = np.asarray([board.lights for board in boards])
 
     print("Total boards:", len(boards))
     print(lights)
@@ -34,7 +34,7 @@ def test_all_boards():
     for ind in np.nonzero(lights == u[-1])[0]:
         board = boards[ind]
         console.print(board)
-        print(f"{board.lights():08b}")
+        print(f"{board.lights:08b}")
 
     # find unique lights
     print("unique puzzles")
@@ -45,4 +45,4 @@ def test_all_boards():
         ind = inds[0]
         board = boards[ind]
         console.print(board)
-        print(f"{board.lights()}, {board.lights():08b}")
+        print(f"{board.lights}, {board.lights:08b}")

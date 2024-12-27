@@ -152,6 +152,7 @@ class Board:
         """Return True if x, y is on the inner board (not outer edge or corners)"""
         return 0 < x <= self.n and 0 < y <= self.n
 
+    @property
     def lights(self):
         """Return an int encoding the lights, determined by the dominoes placed on this board."""
         lo = np.bitwise_or.reduce(self.values, axis=0) == 3
@@ -171,7 +172,7 @@ class Board:
 
     def to_puzzle(self):
         dominoes = [pd.domino for pd in self.placed_dominoes]
-        return Puzzle(self.lights(), dominoes)
+        return Puzzle(self.lights, dominoes)
 
     def __str__(self):
         return str(self.values)

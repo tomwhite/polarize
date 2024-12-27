@@ -59,12 +59,12 @@ def test_board_to_puzzle():
             [0, 0, 1, 0,]
         ]
     ))
-    assert board.lights() == 0b00100010
+    assert board.lights == 0b00100010
 
 
     puzzle = board.to_puzzle()
 
-    assert puzzle.lights == board.lights()
+    assert puzzle.lights == board.lights
     assert puzzle.dominoes == [ALL_DOMINOES[4], ALL_DOMINOES[5]]
 
     # print the puzzle
