@@ -38,6 +38,7 @@ def all_boards(dominoes):
 
 
 def count_puzzles(num_pieces):
+    # Note that this doesn't take symmetries into account (so it double counts)
     count = 0
     for dominoes in combinations_with_replacement(ALL_DOMINOES, num_pieces):
         # find all the boards and lights for these dominoes
