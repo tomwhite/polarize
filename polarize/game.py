@@ -69,6 +69,7 @@ class PolarizePuzzle(arcade.Window):
         self.board = Board()
 
         self.shape_list = None
+        self.light_list = None
 
         # domino sprites
         self.domino_list = None
@@ -115,6 +116,31 @@ class PolarizePuzzle(arcade.Window):
             )
             self.shape_list.append(line)
 
+        self.light_list = arcade.SpriteList()
+        li = self.puzzle.lights
+        i = 0
+        for j in range(n):
+            dark = (li >> (j + 3)) & 1
+            colour = arcade.color.BLACK if dark else arcade.color.ELECTRIC_YELLOW
+            for i in (0, 5):
+                x, y = block_index_to_coord(i, j + 1)
+                light = arcade.SpriteCircle(
+                    CELL_SIZE // 2 - 4, colour
+                )
+                light.position = x, y
+                self.light_list.append(light)
+
+        for i in range(n):
+            dark = (li >> (3 - i)) & 1
+            colour = arcade.color.BLACK if dark else arcade.color.ELECTRIC_YELLOW
+            for j in (0, 5):
+                x, y = block_index_to_coord(i + 1, j)
+                light = arcade.SpriteCircle(
+                    CELL_SIZE // 2 - 4, colour
+                )
+                light.position = x, y
+                self.light_list.append(light)
+
         self.domino_list = arcade.SpriteList()
         self.domino_cells = {}
 
@@ -157,6 +183,7 @@ class PolarizePuzzle(arcade.Window):
         #     0, flip_y(40), SCREEN_WIDTH, 40, self.background
         # )
         self.shape_list.draw()
+        self.light_list.draw()
         self.cell_list.draw()
         self.domino_list.draw()
 
