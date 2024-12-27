@@ -120,7 +120,7 @@ class Board:
         self.colours = np.zeros((4, 4), dtype=np.int8)
         self.n = 4  # assume board of size 4
         self.n_dominoes = 0
-        self.placed_dominoes = placed_dominoes
+        self.placed_dominoes = []
         for placed_domino in placed_dominoes:
             self.add_domino(placed_domino)
 
@@ -135,6 +135,7 @@ class Board:
         self.values[placed_domino.np_index] = [domino.filter1.value, domino.filter2.value]
         self.colours[placed_domino.np_index] = self.n_dominoes + 1
         self.n_dominoes += 1
+        self.placed_dominoes.append(placed_domino)
 
     def can_remove(self, placed_domino):
         domino = placed_domino.domino
@@ -147,6 +148,7 @@ class Board:
         self.values[placed_domino.np_index] = 0
         self.colours[placed_domino.np_index] = 0
         self.n_dominoes -= 1
+        self.placed_dominoes.remove(placed_domino)
 
     def on_board(self, x, y):
         """Return True if x, y is on the inner board (not outer edge or corners)"""

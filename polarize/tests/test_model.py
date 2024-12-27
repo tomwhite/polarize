@@ -46,10 +46,9 @@ def test_add_domino():
 
 
 def test_board_to_puzzle():
-    board = Board(
-        PlacedDomino(ALL_DOMINOES[4], 0, 2),
-        PlacedDomino(ALL_DOMINOES[5], 2, 2),
-    )
+    board = Board()
+    board.add_domino(PlacedDomino(ALL_DOMINOES[4], 0, 2))
+    board.add_domino(PlacedDomino(ALL_DOMINOES[5], 2, 2))
 
     assert_array_equal(board.values, np.array(
         [
