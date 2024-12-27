@@ -7,6 +7,7 @@ from time import time
 
 import arcade
 
+from polarize.generate import generate
 from polarize.model import Board, DominoOrientation, PlacedDomino, ALL_DOMINOES
 
 # Screen title and size
@@ -45,6 +46,11 @@ COLOURS = [
         "#a9a9a9",
     ]
 ]
+
+
+from rich.console import Console
+
+console = Console()
 
 
 class DominoSprite(arcade.Sprite):
@@ -87,7 +93,7 @@ class PolarizePuzzle(arcade.Window):
         arcade.set_background_color(arcade.color.WHITE)
 
         # TODO
-        print(self.board)
+        console.print(puzzle)
 
     def setup(self):
         # self.background = arcade.load_texture("sprites/reflect.png")
@@ -117,10 +123,10 @@ class PolarizePuzzle(arcade.Window):
             self.shape_list.append(line)
 
         self.light_list = arcade.SpriteList()
-        li = self.puzzle.lights
+        li = self.puzzle.lights_bool
         i = 0
         for j in range(n):
-            dark = (li >> (j + 3)) & 1
+            dark = li[j]
             colour = arcade.color.BLACK if dark else arcade.color.ELECTRIC_YELLOW
             for i in (0, 5):
                 x, y = block_index_to_coord(i, j + 1)
@@ -131,7 +137,7 @@ class PolarizePuzzle(arcade.Window):
                 self.light_list.append(light)
 
         for i in range(n):
-            dark = (li >> (3 - i)) & 1
+            dark = li[4 + i]
             colour = arcade.color.BLACK if dark else arcade.color.ELECTRIC_YELLOW
             for j in (0, 5):
                 x, y = block_index_to_coord(i + 1, j)
@@ -271,7 +277,7 @@ class PolarizePuzzle(arcade.Window):
             #     reset_position = False
 
                 print(self.board)
-
+                console.print(self.board)
                 if self.board.lights == self.puzzle.lights:
                     print("YOU SOLVED IT!")
         if reset_position:
@@ -297,11 +303,12 @@ def flip_y(y):
 
 def play_game():
 
-    board = Board(
-        PlacedDomino(ALL_DOMINOES[4], 0, 2),
-        PlacedDomino(ALL_DOMINOES[5], 2, 2),
-    )
-    puzzle = board.to_puzzle()
+    puzzle = generate()
+    # board = Board(
+    #     PlacedDomino(ALL_DOMINOES[4], 0, 2),
+    #     PlacedDomino(ALL_DOMINOES[5], 2, 2),
+    # )
+    # puzzle = board.to_puzzle()
 
     window = PolarizePuzzle(puzzle)
     window.setup()

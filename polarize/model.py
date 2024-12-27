@@ -67,23 +67,27 @@ class Puzzle:
         self.lights = lights
         self.dominoes = dominoes
 
+    @property
+    def lights_bool(self):
+        return lights_to_bool_array(self.lights)
+
     def __str__(self):
         return f"{self.lights:08b}, {self.dominoes}"
 
     def __rich__(self):
         text = Text()
-        li = self.lights
+        li = self.lights_bool
         for y in range(6):
             for x in range(6):
                 if 1 <= x <= 4 and 1 <= y <= 4:
                     text.append(".")
                 elif x in (0, 5) and 1 <= y <= 4:
-                    if (li >> (y + 2)) & 1:
+                    if li[y - 1]:
                         text.append(BLOCK)
                     else:
                         text.append(BLOCK, style="#ffff00")
                 elif y in (0, 5) and 1 <= x <= 4:
-                    if (li >> (4 - x)) & 1:
+                    if li[4 + (x - 1)]:
                         text.append(BLOCK)
                     else:
                         text.append(BLOCK, style="#ffff00")
@@ -171,6 +175,10 @@ class Board:
             | lo[2] << 1
             | lo[3]
         )
+    
+    @property
+    def lights_bool(self):
+        return lights_to_bool_array(self.lights)
 
     def to_puzzle(self):
         dominoes = [pd.domino for pd in self.placed_dominoes]
@@ -191,3 +199,16 @@ class Board:
                     text.append(PolarizingFilter(v).char, style=f"color({c})")
             text.append("\n")
         return text
+
+
+def lights_to_bool_array(lights: int):
+    a = np.empty(8, dtype=bool)
+    a[0] = (lights >> 7) & 1
+    a[1] = (lights >> 6) & 1
+    a[2] = (lights >> 5) & 1
+    a[3] = (lights >> 4) & 1
+    a[4] = (lights >> 3) & 1
+    a[5] = (lights >> 2) & 1
+    a[6] = (lights >> 1) & 1
+    a[7] = (lights >> 0) & 1
+    return a

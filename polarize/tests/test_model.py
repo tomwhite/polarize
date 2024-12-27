@@ -59,11 +59,12 @@ def test_board_to_puzzle():
         ]
     ))
     assert board.lights == 0b00100010
-
+    assert_array_equal(board.lights_bool, [False, False, True, False, False, False, True, False])
 
     puzzle = board.to_puzzle()
 
     assert puzzle.lights == board.lights
+    assert_array_equal(puzzle.lights_bool, board.lights_bool)
     assert puzzle.dominoes == [ALL_DOMINOES[4], ALL_DOMINOES[5]]
 
     # print the puzzle
