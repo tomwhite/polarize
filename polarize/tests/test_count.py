@@ -1,6 +1,6 @@
 import numpy as np
 
-from polarize.count import all_boards
+from polarize.count import all_boards, count_puzzles
 from polarize.model import ALL_DOMINOES
 
 
@@ -46,3 +46,9 @@ def test_all_boards():
         board = boards[ind]
         console.print(board)
         print(f"{board.lights}, {board.lights:08b}")
+
+
+def test_count_puzzles():
+    assert count_puzzles(2) == 64
+    assert count_puzzles(3) == 488
+    # assert count_puzzles(4) == 1032

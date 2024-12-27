@@ -1,6 +1,8 @@
-from itertools import permutations, product
+from itertools import combinations_with_replacement, permutations, product
 
-from polarize.model import Board, PlacedDomino
+import numpy as np
+
+from polarize.model import ALL_DOMINOES, Board, PlacedDomino
 
 
 def all_boards(dominoes):
@@ -33,3 +35,17 @@ def all_boards(dominoes):
                 yield board
             except ValueError:
                 pass  # try next coords
+
+
+def count_puzzles(num_pieces):
+    count = 0
+    for dominoes in combinations_with_replacement(ALL_DOMINOES, num_pieces):
+        # find all the boards and lights for these dominoes
+        boards = list(all_boards(dominoes))
+        lights = np.asarray([board.lights for board in boards])
+
+        # find unique lights
+        _, uc = np.unique_counts(lights)
+
+        count += np.count_nonzero(uc == 1)
+    return count
