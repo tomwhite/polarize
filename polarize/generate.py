@@ -12,7 +12,6 @@ def generate(n_pieces=None):
     while True:
         # choose some dominoes
         dominoes = random.choices(ALL_DOMINOES, k=n_pieces)
-        print(dominoes)
 
         # find all the boards and lights for these dominoes
         boards = list(all_boards(dominoes))
@@ -35,15 +34,6 @@ def generate(n_pieces=None):
 
         break
 
-    from rich.console import Console
-
-    console = Console()
-    console.print(board)
-
-    print(f"{board.lights}, {board.lights:08b}")
-
     puzzle = board.to_puzzle()
-    console.print(puzzle)
-    print(f"{puzzle.lights}, {puzzle.lights:08b}")
 
     return puzzle

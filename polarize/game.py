@@ -12,7 +12,7 @@ from polarize.model import Board, DominoOrientation, PlacedDomino, ALL_DOMINOES
 
 # Screen title and size
 SCREEN_WIDTH = 240
-SCREEN_HEIGHT = 360
+SCREEN_HEIGHT = 400
 SCREEN_TITLE = "Polarize"
 
 BLOCK_SIZE = 40
@@ -303,13 +303,7 @@ def flip_y(y):
 
 def play_game():
 
-    puzzle = generate(3)
-    # board = Board(
-    #     PlacedDomino(ALL_DOMINOES[4], 0, 2),
-    #     PlacedDomino(ALL_DOMINOES[5], 2, 2),
-    # )
-    # puzzle = board.to_puzzle()
-
+    puzzle = generate(4)
     window = PolarizePuzzle(puzzle)
     window.setup()
     arcade.run()
