@@ -7,9 +7,11 @@ from polarize.model import ALL_DOMINOES
 
 def generate(n_pieces=None):
 
+    n_pieces = n_pieces or 3
+
     while True:
         # choose some dominoes
-        dominoes = random.choices(ALL_DOMINOES, k=3)
+        dominoes = random.choices(ALL_DOMINOES, k=n_pieces)
         print(dominoes)
 
         # find all the boards and lights for these dominoes

@@ -303,7 +303,7 @@ def flip_y(y):
 
 def play_game():
 
-    puzzle = generate()
+    puzzle = generate(3)
     # board = Board(
     #     PlacedDomino(ALL_DOMINOES[4], 0, 2),
     #     PlacedDomino(ALL_DOMINOES[5], 2, 2),
