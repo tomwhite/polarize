@@ -50,21 +50,43 @@ def test_board_to_puzzle():
     board.add_domino(PlacedDomino(ALL_DOMINOES[4], 0, 2))
     board.add_domino(PlacedDomino(ALL_DOMINOES[5], 2, 2))
 
-    assert_array_equal(board.values, np.array(
+    assert_array_equal(
+        board.values,
+        np.array(
+            [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [2, 1, 2, 0],
+                [
+                    0,
+                    0,
+                    1,
+                    0,
+                ],
+            ]
+        ),
+    )
+    assert_array_equal(board.lights, [0, 0, 2, 1, 1, 1, 2, 0])
+    assert board.lights_int == 0b0000_1001_0101_1000
+
+    assert_array_equal(
+        board.paths_horizontal,
         [
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [2, 1, 2, 0],
-            [0, 0, 1, 0,]
-        ]
-    ))
-    assert board.lights == 0b00100010
-    assert_array_equal(board.lights_bool, [False, False, True, False, False, False, True, False])
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 1, 2, 2, 2],
+            [0, 0, 0, 1, 1],
+        ],
+    )
+    assert_array_equal(
+        board.paths_vertical,
+        [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 0], [1, 1, 2, 0]],
+    )
 
     puzzle = board.to_puzzle()
 
-    assert puzzle.lights == board.lights
-    assert_array_equal(puzzle.lights_bool, board.lights_bool)
+    assert_array_equal(puzzle.lights, board.lights)
+    assert puzzle.lights_int == board.lights_int
     assert puzzle.dominoes == [ALL_DOMINOES[4], ALL_DOMINOES[5]]
 
     # print the puzzle

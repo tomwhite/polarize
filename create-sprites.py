@@ -6,7 +6,6 @@ from PIL import Image
 from polarize.model import DominoOrientation, PolarizingFilter, ALL_DOMINOES
 
 if __name__ == "__main__":
-
     images = {
         PolarizingFilter.POS_45: Image.open("sprites/polarize-pos45.png"),
         PolarizingFilter.NEG_45: Image.open("sprites/polarize-neg45.png"),

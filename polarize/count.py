@@ -43,7 +43,7 @@ def count_puzzles(num_pieces):
     for dominoes in combinations_with_replacement(ALL_DOMINOES, num_pieces):
         # find all the boards and lights for these dominoes
         boards = list(all_boards(dominoes))
-        lights = np.asarray([board.lights for board in boards])
+        lights = np.asarray([board.lights_int for board in boards])
 
         # find unique lights
         _, uc = np.unique_counts(lights)

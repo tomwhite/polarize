@@ -1,5 +1,6 @@
 from polarize.generate import generate
 
+
 def test_generate():
-    puzzle = generate()
+    puzzle, solution = generate()
     print(puzzle)

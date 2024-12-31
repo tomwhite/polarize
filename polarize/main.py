@@ -1,16 +1,18 @@
 import click
 
-from polarize.game import play_game 
+from polarize.game import play_game
+
 
 @click.group()
 def cli():
     pass
 
+
 @cli.command()
-@click.argument("filename", required=False)
-def play(filename):
+@click.option("--pieces", default=3)
+def play(pieces):
     """Play Polarize puzzles"""
-    play_game()
+    play_game(pieces)
 
 
 if __name__ == "__main__":

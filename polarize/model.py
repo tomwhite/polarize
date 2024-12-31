@@ -10,6 +10,7 @@ BLOCK = "\u2588"
 
 class PolarizingFilter(Enum):
     """A polarizing filter with a set orientation."""
+
     def __new__(cls, value, char):
         obj = object.__new__(cls)
         obj._value_ = value
@@ -27,6 +28,7 @@ DominoOrientation = Enum("DominoOrientation", ["HORIZONTAL", "VERTICAL"])
 class Domino:
     """A domino is made up of two polarizing filters, and is oriented either
     horizontally or vertically."""
+
     filter1: PolarizingFilter
     filter2: PolarizingFilter
     orientation: DominoOrientation
@@ -68,29 +70,34 @@ class Puzzle:
         self.dominoes = dominoes
 
     @property
-    def lights_bool(self):
-        return lights_to_bool_array(self.lights)
+    def lights_int(self):
+        return encode_lights(self.lights)
 
     def __str__(self):
-        return f"{self.lights:08b}, {self.dominoes}"
+        return f"{self.lights_int:016b}, {self.dominoes}"
 
     def __rich__(self):
         text = Text()
-        li = self.lights_bool
+        li = self.lights
         for y in range(6):
             for x in range(6):
                 if 1 <= x <= 4 and 1 <= y <= 4:
                     text.append(".")
                 elif x in (0, 5) and 1 <= y <= 4:
-                    if li[y - 1]:
-                        text.append(BLOCK)
-                    else:
+                    if li[y - 1] == 0:
                         text.append(BLOCK, style="#ffff00")
+                    elif li[y - 1] == 1:
+                        # ARYLIDE_YELLOW
+                        text.append(BLOCK, style="#E9D66B")
+                    else:
+                        text.append(BLOCK)
                 elif y in (0, 5) and 1 <= x <= 4:
-                    if li[4 + (x - 1)]:
-                        text.append(BLOCK)
-                    else:
+                    if li[4 + (x - 1)] == 0:
                         text.append(BLOCK, style="#ffff00")
+                    elif li[4 + (x - 1)] == 1:
+                        text.append(BLOCK, style="#E9D66B")
+                    else:
+                        text.append(BLOCK)
                 else:
                     text.append(" ")
             text.append("\n")
@@ -103,6 +110,7 @@ class Puzzle:
 @dataclass(frozen=True)
 class PlacedDomino:
     """A domino placed in a fixed position on a board."""
+
     domino: Domino
     x: int  # across
     y: int  # down
@@ -115,6 +123,7 @@ class PlacedDomino:
         else:
             x2, y2 = x, y + 1
         return np.array([y, y2]), np.array([x, x2])
+
 
 class Board:
     """A Polarize board consists of a set of placed dominoes."""
@@ -136,7 +145,10 @@ class Board:
 
     def add_domino(self, placed_domino):
         domino = placed_domino.domino
-        self.values[placed_domino.np_index] = [domino.filter1.value, domino.filter2.value]
+        self.values[placed_domino.np_index] = [
+            domino.filter1.value,
+            domino.filter2.value,
+        ]
         self.colours[placed_domino.np_index] = self.n_dominoes + 1
         self.n_dominoes += 1
         self.placed_dominoes.append(placed_domino)
@@ -144,7 +156,10 @@ class Board:
     def can_remove(self, placed_domino):
         domino = placed_domino.domino
         try:
-            return np.all(self.values[placed_domino.np_index] == [domino.filter1.value, domino.filter2.value])
+            return np.all(
+                self.values[placed_domino.np_index]
+                == [domino.filter1.value, domino.filter2.value]
+            )
         except IndexError:
             return False
 
@@ -160,25 +175,33 @@ class Board:
 
     @property
     def lights(self):
-        """Return an int encoding the lights, determined by the dominoes placed on this board."""
-        lo = np.bitwise_or.reduce(self.values, axis=0) == 3
-        lo = np.astype(lo, np.uint8)
-        hi = np.bitwise_or.reduce(self.values, axis=1) == 3
-        hi = np.astype(hi, np.uint8)
-        return (
-            hi[0] << 7
-            | hi[1] << 6
-            | hi[2] << 5
-            | hi[3] << 4
-            | lo[0] << 3
-            | lo[1] << 2
-            | lo[2] << 1
-            | lo[3]
-        )
-    
+        li = np.empty(self.n * 2, dtype=np.uint8)
+        lo = np.bitwise_count(np.bitwise_or.reduce(self.values, axis=0))
+        hi = np.bitwise_count(np.bitwise_or.reduce(self.values, axis=1))
+        li[: self.n] = hi
+        li[self.n :] = lo
+        return li
+
     @property
-    def lights_bool(self):
-        return lights_to_bool_array(self.lights)
+    def lights_int(self):
+        """Return an int encoding the lights, determined by the dominoes placed on this board."""
+        return encode_lights(self.lights)
+
+    @property
+    def paths_horizontal(self):
+        paths = np.zeros((self.n, self.n + 1), dtype=np.uint8)
+        for i in range(self.n):
+            paths[:, i + 1] = np.bitwise_or(paths[:, i], self.values[:, i])
+        paths = np.bitwise_count(paths)
+        return paths
+
+    @property
+    def paths_vertical(self):
+        paths = np.zeros((self.n + 1, self.n), dtype=np.uint8)
+        for i in range(self.n):
+            paths[i + 1, :] = np.bitwise_or(paths[i, :], self.values[i, :])
+        paths = np.bitwise_count(paths)
+        return paths
 
     def to_puzzle(self):
         dominoes = [pd.domino for pd in self.placed_dominoes]
@@ -201,14 +224,9 @@ class Board:
         return text
 
 
-def lights_to_bool_array(lights: int):
-    a = np.empty(8, dtype=bool)
-    a[0] = (lights >> 7) & 1
-    a[1] = (lights >> 6) & 1
-    a[2] = (lights >> 5) & 1
-    a[3] = (lights >> 4) & 1
-    a[4] = (lights >> 3) & 1
-    a[5] = (lights >> 2) & 1
-    a[6] = (lights >> 1) & 1
-    a[7] = (lights >> 0) & 1
-    return a
+def encode_lights(lights):
+    ret = 0
+    for b in lights:
+        ret = ret << 2
+        ret = ret | int(b)
+    return ret
