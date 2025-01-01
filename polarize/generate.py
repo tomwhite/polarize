@@ -6,7 +6,7 @@ from polarize.count import all_boards
 from polarize.model import ALL_DOMINOES
 
 
-def generate(n_pieces=None):
+def generate(n, n_pieces=None):
     n_pieces = n_pieces or 3
 
     while True:
@@ -14,7 +14,7 @@ def generate(n_pieces=None):
         dominoes = random.choices(ALL_DOMINOES, k=n_pieces)
 
         # find all the boards and lights for these dominoes
-        boards = list(all_boards(dominoes))
+        boards = list(all_boards(n, dominoes))
         lights = np.asarray([board.lights_int for board in boards])
 
         # find unique lights

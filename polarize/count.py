@@ -5,9 +5,7 @@ import numpy as np
 from polarize.model import ALL_DOMINOES, Board, PlacedDomino
 
 
-def all_boards(dominoes):
-    n = 4
-
+def all_boards(n, dominoes):
     def coord_lt(coord1, coord2):
         y1, x1 = coord1
         y2, x2 = coord2
@@ -26,7 +24,7 @@ def all_boards(dominoes):
                 continue
 
             try:
-                board = Board()
+                board = Board(n=n)
                 for domino, coord in zip(domino_perm, coords):
                     y, x = coord
                     pd = PlacedDomino(domino, x, y)
@@ -39,12 +37,12 @@ def all_boards(dominoes):
                 pass  # try next coords
 
 
-def count_puzzles(num_pieces):
+def count_puzzles(n, num_pieces):
     # Note that this doesn't take symmetries into account (so it double counts)
     count = 0
     for dominoes in combinations_with_replacement(ALL_DOMINOES, num_pieces):
         # find all the boards and lights for these dominoes
-        boards = list(all_boards(dominoes))
+        boards = list(all_boards(n, dominoes))
         lights = np.asarray([board.lights_int for board in boards])
 
         # find unique lights

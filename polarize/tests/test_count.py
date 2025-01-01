@@ -11,12 +11,12 @@ def test_all_boards():
 
     dominoes = [ALL_DOMINOES[0], ALL_DOMINOES[3]]
 
-    for board in all_boards(dominoes):
+    for board in all_boards(n=4, dominoes=dominoes):
         # print(board)
         console.print(board)
         print(board.lights_int)
 
-    boards = list(all_boards(dominoes))
+    boards = list(all_boards(n=4, dominoes=dominoes))
     lights = np.asarray([board.lights_int for board in boards])
 
     print("Total boards:", len(boards))
@@ -49,7 +49,7 @@ def test_all_boards():
 
 
 def test_count_puzzles():
-    assert count_puzzles(1) == 96
-    assert count_puzzles(2) == 1824
-    # assert count_puzzles(3) == 12816
-    # assert count_puzzles(4) == 25240
+    assert count_puzzles(4, 1) == 96
+    assert count_puzzles(4, 2) == 1824
+    # assert count_puzzles(4, 3) == 12816
+    # assert count_puzzles(4, 4) == 25240

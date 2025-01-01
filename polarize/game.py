@@ -40,7 +40,7 @@ class PolarizePuzzle(arcade.Window):
 
         self.puzzle = puzzle
         self.solution = solution
-        self.board = Board()
+        self.board = Board(puzzle.n)
 
         self.shape_list = None
         self.light_list = None
@@ -102,7 +102,7 @@ class PolarizePuzzle(arcade.Window):
                 colour = arcade.color.MIKADO_YELLOW
             else:
                 colour = arcade.color.BLACK
-            for i in (0, 5):
+            for i in (0, n + 1):
                 x, y = block_index_to_coord(i, j + 1)
                 if i == 0:
                     light = arcade.SpriteSolidColor(
@@ -114,13 +114,13 @@ class PolarizePuzzle(arcade.Window):
                 self.light_list.append(light)
 
         for i in range(n):
-            if li[4 + i] == 0:
+            if li[n + i] == 0:
                 colour = arcade.color.ELECTRIC_YELLOW
-            elif li[4 + i] == 1:
+            elif li[n + i] == 1:
                 colour = arcade.color.MIKADO_YELLOW
             else:
                 colour = arcade.color.BLACK
-            for j in (0, 5):
+            for j in (0, n + 1):
                 x, y = block_index_to_coord(i + 1, j)
                 if j == 0:
                     light = arcade.SpriteSolidColor(
@@ -190,10 +190,10 @@ class PolarizePuzzle(arcade.Window):
         sorted_dominoes = sorted(self.puzzle.dominoes, key=sort_vert_first)
         i, j = 0, 0
         for domino in sorted_dominoes:
-            if domino.orientation is DominoOrientation.VERTICAL and i > 5:
+            if domino.orientation is DominoOrientation.VERTICAL and i > n + 1:
                 i = 0
                 j += 2
-            elif domino.orientation is DominoOrientation.HORIZONTAL and i > 4:
+            elif domino.orientation is DominoOrientation.HORIZONTAL and i > n:
                 i = 0
                 j += 2
 
@@ -350,7 +350,7 @@ def flip_y(y):
 
 
 def play_game(pieces):
-    puzzle, solution = generate(pieces)
+    puzzle, solution = generate(4, pieces)
     window = PolarizePuzzle(puzzle, solution)
     window.setup()
     arcade.run()
