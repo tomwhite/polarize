@@ -10,7 +10,7 @@ def test_all_dominoes():
 
 
 def test_add_domino():
-    board = Board(n=4)
+    board = Board()
 
     d1 = PlacedDomino(ALL_DOMINOES[4], 0, 2)
     d2 = PlacedDomino(ALL_DOMINOES[5], 2, 2)
@@ -83,6 +83,37 @@ def test_board_to_puzzle():
     assert_array_equal(puzzle.lights, board.lights)
     assert puzzle.lights_int == board.lights_int
     assert puzzle.dominoes == [ALL_DOMINOES[4], ALL_DOMINOES[5]]
+
+    # print the puzzle
+    console = Console()
+    console.print(puzzle)
+
+
+def test_board_to_puzzle_size_3():
+    board = Board(n=3)
+    board.add_domino(PlacedDomino(ALL_DOMINOES[1], 1, 0))
+    board.add_domino(PlacedDomino(ALL_DOMINOES[2], 0, 2))
+
+    # fmt: off
+    assert_array_equal(
+        board.values,
+        np.array(
+            [
+                [0, 1, 0],
+                [0, 1, 0],
+                [1, 2, 0],
+            ]
+        ),
+    )
+    # fmt: on
+    assert_array_equal(board.lights, [1, 1, 2, 1, 2, 0])
+    assert board.lights_int == 0b0101_1001_1000
+
+    puzzle = board.to_puzzle()
+
+    assert_array_equal(puzzle.lights, board.lights)
+    assert puzzle.lights_int == board.lights_int
+    assert puzzle.dominoes == [ALL_DOMINOES[1], ALL_DOMINOES[2]]
 
     # print the puzzle
     console = Console()
