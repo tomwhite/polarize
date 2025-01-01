@@ -10,7 +10,7 @@ def test_all_dominoes():
 
 
 def test_add_domino():
-    board = Board()
+    board = Board(n=4)
 
     d1 = PlacedDomino(ALL_DOMINOES[4], 0, 2)
     d2 = PlacedDomino(ALL_DOMINOES[5], 2, 2)
@@ -57,12 +57,7 @@ def test_board_to_puzzle():
                 [0, 0, 0, 0],
                 [0, 0, 0, 0],
                 [2, 1, 2, 0],
-                [
-                    0,
-                    0,
-                    1,
-                    0,
-                ],
+                [0, 0, 1, 0],
             ]
         ),
     )

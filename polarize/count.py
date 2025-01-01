@@ -6,10 +6,12 @@ from polarize.model import ALL_DOMINOES, Board, PlacedDomino
 
 
 def all_boards(dominoes):
+    n = 4
+
     def coord_lt(coord1, coord2):
         y1, x1 = coord1
         y2, x2 = coord2
-        return x1 + 4 * y1 < x2 + 4 * y2
+        return x1 + n * y1 < x2 + n * y2
 
     def coords_increasing(coords):
         for i in range(len(coords) - 1):

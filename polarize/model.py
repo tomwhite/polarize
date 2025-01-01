@@ -64,8 +64,8 @@ ALL_DOMINOES = [
 class Puzzle:
     """A Polarize puzzle consists of lights and a set of dominoes."""
 
-    def __init__(self, lights, dominoes):
-        self.n = 4
+    def __init__(self, n, lights, dominoes):
+        self.n = n
         self.lights = lights
         self.dominoes = dominoes
 
@@ -77,13 +77,14 @@ class Puzzle:
         return f"{self.lights_int:016b}, {self.dominoes}"
 
     def __rich__(self):
+        n = self.n
         text = Text()
         li = self.lights
-        for y in range(6):
-            for x in range(6):
-                if 1 <= x <= 4 and 1 <= y <= 4:
+        for y in range(n + 2):
+            for x in range(n + 2):
+                if 1 <= x <= n and 1 <= y <= n:
                     text.append(".")
-                elif x in (0, 5) and 1 <= y <= 4:
+                elif x in (0, n + 1) and 1 <= y <= n:
                     if li[y - 1] == 0:
                         text.append(BLOCK, style="#ffff00")
                     elif li[y - 1] == 1:
@@ -91,10 +92,10 @@ class Puzzle:
                         text.append(BLOCK, style="#E9D66B")
                     else:
                         text.append(BLOCK)
-                elif y in (0, 5) and 1 <= x <= 4:
-                    if li[4 + (x - 1)] == 0:
+                elif y in (0, n + 1) and 1 <= x <= n:
+                    if li[n + (x - 1)] == 0:
                         text.append(BLOCK, style="#ffff00")
-                    elif li[4 + (x - 1)] == 1:
+                    elif li[n + (x - 1)] == 1:
                         text.append(BLOCK, style="#E9D66B")
                     else:
                         text.append(BLOCK)
@@ -128,14 +129,12 @@ class PlacedDomino:
 class Board:
     """A Polarize board consists of a set of placed dominoes."""
 
-    def __init__(self, *placed_dominoes):
-        self.values = np.zeros((4, 4), dtype=np.int8)
-        self.colours = np.zeros((4, 4), dtype=np.int8)
-        self.n = 4  # assume board of size 4
+    def __init__(self, n=4):
+        self.n = n
+        self.values = np.zeros((self.n, self.n), dtype=np.int8)
+        self.colours = np.zeros((self.n, self.n), dtype=np.int8)
         self.n_dominoes = 0
         self.placed_dominoes = []
-        for placed_domino in placed_dominoes:
-            self.add_domino(placed_domino)
 
     def can_add(self, placed_domino):
         try:
@@ -205,15 +204,15 @@ class Board:
 
     def to_puzzle(self):
         dominoes = [pd.domino for pd in self.placed_dominoes]
-        return Puzzle(self.lights, dominoes)
+        return Puzzle(self.n, self.lights, dominoes)
 
     def __str__(self):
         return str(self.values)
 
     def __rich__(self):
         text = Text()
-        for y in range(4):
-            for x in range(4):
+        for y in range(self.n):
+            for x in range(self.n):
                 v = self.values[y, x]
                 c = self.colours[y, x]
                 if v == 0:
