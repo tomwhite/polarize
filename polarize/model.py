@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from itertools import product
+import json
 
 import numpy as np
 from rich.text import Text
@@ -68,6 +69,16 @@ class Puzzle:
         self.n = n
         self.lights = lights
         self.dominoes = dominoes
+
+    @classmethod
+    def from_json_str(cls, json_str):
+        data = json.loads(json_str)
+        return cls(n=data["n"], lights=data["lights"], dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]])
+
+    @classmethod
+    def from_json_file(cls, filename):
+        data = json.load(filename)
+        return cls(n=data["n"], lights=data["lights"], dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]])
 
     @property
     def lights_int(self):

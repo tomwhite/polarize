@@ -5,7 +5,6 @@ Polarize puzzle.
 import arcade
 from rich.console import Console
 
-from polarize.generate import generate
 from polarize.model import Board, DominoOrientation, PlacedDomino
 
 # Screen title and size
@@ -349,8 +348,7 @@ def flip_y(y):
     return SCREEN_HEIGHT - y
 
 
-def play_game(pieces):
-    puzzle, solution = generate(4, pieces)
+def play_game(puzzle, solution):
     window = PolarizePuzzle(puzzle, solution)
     window.setup()
     arcade.run()
