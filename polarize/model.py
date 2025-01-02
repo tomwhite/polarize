@@ -29,9 +29,9 @@ class Domino:
     """A domino is made up of two polarizing filters, and is oriented either
     horizontally or vertically."""
 
+    orientation: DominoOrientation
     filter1: PolarizingFilter
     filter2: PolarizingFilter
-    orientation: DominoOrientation
 
     def places(self, n=4):
         # return y, x values of where this domino can be placed on a board
@@ -45,8 +45,8 @@ class Domino:
     def value(self):
         return (
             ((self.orientation.value - 1) << 2)
-            | ((self.filter2.value - 1) << 1)
-            | (self.filter1.value - 1)
+            | ((self.filter1.value - 1) << 1)
+            | (self.filter2.value - 1)
         )
 
     def __str__(self):
@@ -57,7 +57,7 @@ class Domino:
 
 
 ALL_DOMINOES = [
-    Domino(*p) for p in product(PolarizingFilter, PolarizingFilter, DominoOrientation)
+    Domino(*p) for p in product(DominoOrientation, PolarizingFilter, PolarizingFilter)
 ]
 
 
@@ -131,8 +131,8 @@ class Board:
 
     def __init__(self, n=4):
         self.n = n
-        self.values = np.zeros((self.n, self.n), dtype=np.int8)
-        self.colours = np.zeros((self.n, self.n), dtype=np.int8)
+        self.values = np.zeros((n, n), dtype=np.int8)
+        self.colours = np.zeros((n, n), dtype=np.int8)
         self.n_dominoes = 0
         self.placed_dominoes = []
 
