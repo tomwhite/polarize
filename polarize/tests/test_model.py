@@ -82,7 +82,8 @@ def test_board_to_puzzle():
 
     assert_array_equal(puzzle.lights, board.lights)
     assert puzzle.lights_int == board.lights_int
-    assert puzzle.dominoes == [ALL_DOMINOES[2], ALL_DOMINOES[6]]
+    assert len(puzzle.dominoes) == len(board.placed_dominoes)
+    assert set(puzzle.dominoes) == set([ALL_DOMINOES[2], ALL_DOMINOES[6]])
 
     # print the puzzle
     console = Console()
@@ -113,7 +114,8 @@ def test_board_to_puzzle_size_3():
 
     assert_array_equal(puzzle.lights, board.lights)
     assert puzzle.lights_int == board.lights_int
-    assert puzzle.dominoes == [ALL_DOMINOES[4], ALL_DOMINOES[1]]
+    assert len(puzzle.dominoes) == len(board.placed_dominoes)
+    assert set(puzzle.dominoes) == set([ALL_DOMINOES[4], ALL_DOMINOES[1]])
 
     # print the puzzle
     console = Console()

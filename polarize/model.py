@@ -62,7 +62,7 @@ ALL_DOMINOES = [
 
 
 class Puzzle:
-    """A Polarize puzzle consists of lights and a set of dominoes."""
+    """A Polarize puzzle consists of lights and a multi-set of dominoes."""
 
     def __init__(self, n, lights, dominoes):
         self.n = n
@@ -134,7 +134,7 @@ class Board:
         self.values = np.zeros((n, n), dtype=np.int8)
         self.colours = np.zeros((n, n), dtype=np.int8)
         self.n_dominoes = 0
-        self.placed_dominoes = []
+        self.placed_dominoes = set()
 
     def can_add(self, placed_domino):
         try:
@@ -150,7 +150,7 @@ class Board:
         ]
         self.colours[placed_domino.np_index] = self.n_dominoes + 1
         self.n_dominoes += 1
-        self.placed_dominoes.append(placed_domino)
+        self.placed_dominoes.add(placed_domino)
 
     def can_remove(self, placed_domino):
         domino = placed_domino.domino
