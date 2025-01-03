@@ -6,6 +6,7 @@ import arcade
 from rich.console import Console
 
 from polarize.model import Board, DominoOrientation, PlacedDomino
+from polarize.generate import layout
 
 # Screen title and size
 SCREEN_WIDTH = 240
@@ -173,34 +174,23 @@ class PolarizePuzzle(arcade.Window):
         self.cell_indexes = {}
 
         # off board
-        for i in range(self.puzzle.n + 2):
-            for j in range(self.puzzle.n + 2):
+        for i in range(self.puzzle.n):
+            for j in range(self.puzzle.n - 1):
                 cell = arcade.SpriteSolidColor(
                     CELL_SIZE + 1, CELL_SIZE + 1, arcade.color.LIGHT_GRAY
                 )
-                x, y = block_index_to_coord(i, j)
-                y -= 240
+                x, y = block_index_to_coord(i + 1, j + 1)
+                y -= 200
                 cell.position = x, y
                 self.cell_list.append(cell)
 
-        def sort_vert_first(domino):
-            return 0 if domino.orientation is DominoOrientation.VERTICAL else 1
-
-        sorted_dominoes = sorted(self.puzzle.dominoes, key=sort_vert_first)
-        i, j = 0, 0
-        for domino in sorted_dominoes:
-            if domino.orientation is DominoOrientation.VERTICAL and i > n + 1:
-                i = 0
-                j += 2
-            elif domino.orientation is DominoOrientation.HORIZONTAL and i > n:
-                i = 0
-                j += 2
-
-            domino_sprite = DominoSprite(domino)
-            x, y = block_index_to_coord(i, j)
-            y -= 240
+        off_board = layout(self.puzzle.n, self.puzzle.dominoes)
+        for pd in off_board.placed_dominoes:
+            domino_sprite = DominoSprite(pd.domino)
+            x, y = block_index_to_coord(pd.x + 1, pd.y + 1)
+            y -= 200
             # correction since we want position to refer to center of first block in domino
-            if domino.orientation == DominoOrientation.HORIZONTAL:
+            if pd.domino.orientation == DominoOrientation.HORIZONTAL:
                 x += BLOCK_SIZE // 2
             else:
                 y -= BLOCK_SIZE // 2
@@ -209,12 +199,6 @@ class PolarizePuzzle(arcade.Window):
 
             cell, _ = arcade.get_closest_sprite(domino_sprite, self.cell_list)
             self.domino_cells[cell] = domino_sprite
-
-            # update next i, j
-            if domino.orientation is DominoOrientation.VERTICAL:
-                i += 1
-            else:
-                i += 2
 
         self.held_domino = None
         self.held_domnio_original_position = None

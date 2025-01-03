@@ -1,4 +1,4 @@
-from polarize.count import all_boards
+from polarize.generate import all_boards
 
 def solve(puzzle):
     solution_boards = []
