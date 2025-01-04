@@ -65,20 +65,23 @@ ALL_DOMINOES = [
 class Puzzle:
     """A Polarize puzzle consists of lights and a multi-set of dominoes."""
 
-    def __init__(self, n, lights, dominoes):
+    def __init__(self, n, lights, dominoes, initial_placed_dominoes):
+        # initial_placed_dominoes is used to arrange the dominoes on the off-board cells
         self.n = n
         self.lights = lights
         self.dominoes = dominoes
+        self.initial_placed_dominoes = initial_placed_dominoes
 
     @classmethod
     def from_json_str(cls, json_str):
         data = json.loads(json_str)
-        return cls(n=data["n"], lights=data["lights"], dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]])
+        return cls(n=data["n"], lights=data["lights"], dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]], initial_placed_dominoes=[PlacedDomino(ALL_DOMINOES[d["domino"]],d["i"], d["j"]) for d in data["initial_placed_dominoes"]])
 
+    # TODO: reduce duplication
     @classmethod
     def from_json_file(cls, filename):
         data = json.load(filename)
-        return cls(n=data["n"], lights=data["lights"], dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]])
+        return cls(n=data["n"], lights=data["lights"], dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]], initial_placed_dominoes=[PlacedDomino(ALL_DOMINOES[d["domino"]],d["i"], d["j"]) for d in data["initial_placed_dominoes"]])
 
     @property
     def lights_int(self):
@@ -215,7 +218,12 @@ class Board:
 
     def to_puzzle(self):
         dominoes = [pd.domino for pd in self.placed_dominoes]
-        return Puzzle(self.n, self.lights, dominoes)
+
+        # find an initial placement of the dominoes (off the board)
+        from polarize.generate import layout
+
+        initial_board = layout(self.n, dominoes)
+        return Puzzle(self.n, self.lights, dominoes, initial_board.placed_dominoes)
 
     def __str__(self):
         return str(self.values)

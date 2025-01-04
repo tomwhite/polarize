@@ -6,7 +6,6 @@ import arcade
 from rich.console import Console
 
 from polarize.model import Board, Orientation, PlacedDomino
-from polarize.generate import layout
 
 # Screen title and size
 SCREEN_WIDTH = 240
@@ -184,8 +183,7 @@ class PolarizePuzzle(arcade.Window):
                 cell.position = x, y
                 self.cell_list.append(cell)
 
-        off_board = layout(self.puzzle.n, self.puzzle.dominoes)
-        for pd in off_board.placed_dominoes:
+        for pd in self.puzzle.initial_placed_dominoes:
             domino_sprite = DominoSprite(pd.domino)
             x, y = block_index_to_coord(pd.x + 1, pd.y + 1)
             y -= 200
