@@ -1,15 +1,22 @@
 import click
 
 from polarize.game import play_game
-from polarize.generate import generate
+from polarize.generate import generate as generate_puzzle
 from polarize.solve import solve
-from polarize.storage import load_puzzle
+from polarize.storage import load_puzzle, save_puzzle
 
 
 @click.group()
 def cli():
     pass
 
+@cli.command()
+@click.argument("filename", required=False)
+@click.option("--pieces", default=3)
+def generate(filename, pieces):
+    """Generate puzzles according to specified criteria"""
+    puzzle, _ = generate_puzzle(4, pieces)
+    save_puzzle(puzzle, filename)
 
 @cli.command()
 @click.argument("filename", required=False)

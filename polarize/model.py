@@ -83,6 +83,14 @@ class Puzzle:
         data = json.load(filename)
         return cls(n=data["n"], lights=data["lights"], dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]], initial_placed_dominoes=[PlacedDomino(ALL_DOMINOES[d["domino"]],d["i"], d["j"]) for d in data["initial_placed_dominoes"]])
 
+    def to_json_dict(self):
+        return {
+            "n": self.n,
+            "lights": self.lights.tolist(),
+            "dominoes": [d.value for d in self.dominoes],
+            "initial_placed_dominoes": [{"domino": pd.domino.value, "i": pd.x, "j": pd.y} for pd in self.initial_placed_dominoes],
+        }
+    
     @property
     def lights_int(self):
         return encode_lights(self.lights)
