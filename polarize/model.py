@@ -9,8 +9,8 @@ from rich.text import Text
 BLOCK = "\u2588"
 
 
-class PolarizingFilter(Enum):
-    """A polarizing filter with a set orientation."""
+class Filter(Enum):
+    """A polarizing filter fixed at a given angle."""
 
     def __new__(cls, value, char):
         obj = object.__new__(cls)
@@ -22,7 +22,7 @@ class PolarizingFilter(Enum):
     NEG_45 = (2, "\\")
 
 
-DominoOrientation = Enum("DominoOrientation", ["HORIZONTAL", "VERTICAL"])
+Orientation = Enum("Orientation", ["H", "V"])
 
 
 @dataclass(frozen=True)
@@ -30,13 +30,13 @@ class Domino:
     """A domino is made up of two polarizing filters, and is oriented either
     horizontally or vertically."""
 
-    orientation: DominoOrientation
-    filter1: PolarizingFilter
-    filter2: PolarizingFilter
+    orientation: Orientation
+    filter1: Filter
+    filter2: Filter
 
     def places(self, n=4):
         # return y, x values of where this domino can be placed on a board
-        if self.orientation == DominoOrientation.HORIZONTAL:
+        if self.orientation == Orientation.H:
             x_max, y_max = n - 1, n
         else:
             x_max, y_max = n, n - 1
@@ -51,14 +51,14 @@ class Domino:
         )
 
     def __str__(self):
-        if self.orientation == DominoOrientation.HORIZONTAL:
+        if self.orientation == Orientation.H:
             return f"{self.filter1.char}{self.filter2.char}"
         else:
             return f"{self.filter1.char}\n{self.filter2.char}"
 
 
 ALL_DOMINOES = [
-    Domino(*p) for p in product(DominoOrientation, PolarizingFilter, PolarizingFilter)
+    Domino(*p) for p in product(Orientation, Filter, Filter)
 ]
 
 
@@ -130,7 +130,7 @@ class PlacedDomino:
     @property
     def np_index(self):
         x, y = self.x, self.y
-        if self.domino.orientation == DominoOrientation.HORIZONTAL:
+        if self.domino.orientation == Orientation.H:
             x2, y2 = x + 1, y
         else:
             x2, y2 = x, y + 1
@@ -229,7 +229,7 @@ class Board:
                 if v == 0:
                     text.append(".")
                 else:
-                    text.append(PolarizingFilter(v).char, style=f"color({c})")
+                    text.append(Filter(v).char, style=f"color({c})")
             text.append("\n")
         return text
 

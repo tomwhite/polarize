@@ -1,7 +1,7 @@
 import numpy as np
 
 from polarize.generate import all_boards, generate, layout
-from polarize.model import ALL_DOMINOES, DominoOrientation
+from polarize.model import ALL_DOMINOES, Orientation
 from polarize.solve import solve
 
 

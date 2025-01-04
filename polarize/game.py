@@ -5,7 +5,7 @@ Polarize puzzle.
 import arcade
 from rich.console import Console
 
-from polarize.model import Board, DominoOrientation, PlacedDomino
+from polarize.model import Board, Orientation, PlacedDomino
 from polarize.generate import layout
 
 # Screen title and size
@@ -190,7 +190,7 @@ class PolarizePuzzle(arcade.Window):
             x, y = block_index_to_coord(pd.x + 1, pd.y + 1)
             y -= 200
             # correction since we want position to refer to center of first block in domino
-            if pd.domino.orientation == DominoOrientation.HORIZONTAL:
+            if pd.domino.orientation == Orientation.H:
                 x += BLOCK_SIZE // 2
             else:
                 y -= BLOCK_SIZE // 2
@@ -279,7 +279,7 @@ class PolarizePuzzle(arcade.Window):
             x = cell.center_x
             y = cell.center_y
             # correction since we want position to refer to center of first block in domino
-            if self.held_domino.domino.orientation == DominoOrientation.HORIZONTAL:
+            if self.held_domino.domino.orientation == Orientation.H:
                 x += 32 // 2
             else:
                 y -= 32 // 2

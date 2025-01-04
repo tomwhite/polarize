@@ -4,7 +4,7 @@ from itertools import permutations, product
 
 import numpy as np
 
-from polarize.model import ALL_DOMINOES, Board, DominoOrientation, PlacedDomino
+from polarize.model import ALL_DOMINOES, Board, Orientation, PlacedDomino
 
 def _coord_lt(n, coord1, coord2):
     y1, x1 = coord1
@@ -45,7 +45,7 @@ def layout(n, dominoes):
     # Place all the vertical dominoes first - a heuristic which seems
     # to produce a good layout
     def sort_vert_first(domino):
-        return 0 if domino.orientation is DominoOrientation.VERTICAL else 1
+        return 0 if domino.orientation is Orientation.V else 1
 
     sorted_dominoes = sorted(dominoes, key=sort_vert_first)
 
