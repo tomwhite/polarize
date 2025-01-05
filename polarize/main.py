@@ -29,7 +29,7 @@ def play(filename, pieces):
         assert len(solutions) == 1
         solution = solutions[0]
     else:
-        puzzle, solution = generate(4, pieces)
+        puzzle, solution = generate_puzzle(4, pieces)
 
     play_game(puzzle, solution)
 
