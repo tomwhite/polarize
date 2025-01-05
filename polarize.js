@@ -1,7 +1,7 @@
 // Constants
 
 // Scale sprites so we can have a high resolution for other graphics (text, lines)
-const SCALE = 10;
+const SCALE = 2;
 
 const SCREEN_WIDTH = 240 * SCALE;
 const SCREEN_HEIGHT = 400 * SCALE;
