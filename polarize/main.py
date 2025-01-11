@@ -1,5 +1,8 @@
+from pprint import pprint
+
 import click
 
+from polarize.difficulty import puzzle_features
 from polarize.game import play_game
 from polarize.generate import generate as generate_puzzle
 from polarize.solve import solve
@@ -16,6 +19,7 @@ def cli():
 def generate(filename, pieces):
     """Generate puzzles according to specified criteria"""
     puzzle, _ = generate_puzzle(4, pieces)
+    pprint(puzzle_features(puzzle))
     save_puzzle(puzzle, filename)
 
 @cli.command()
