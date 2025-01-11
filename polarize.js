@@ -320,27 +320,23 @@ function drawLightPaths(n, lightPathGraphics, solution, board_y_offset) {
   const pathsHorizontal = solution.pathsHorizontal();
   for (let i = 0; i < n + 1; i++) {
     for (let j = 0; j < n; j++) {
-      const colour = light_to_colour(pathsHorizontal[j][i])
-      if (colour != BLACK) {
-        // TODO: can we change j + 1 to j?
-        const [x0, y0] = blockIndexToCoord(i, j + 1, board_y_offset);
-        const [x1, y1] = blockIndexToCoord(i + 1, j + 1, board_y_offset);
-        lightPathGraphics.lineStyle(LIGHT_WIDTH, colour);
-        lightPathGraphics.lineBetween(x0, y0, x1, y1);
-      }
+      const colour = light_to_colour(pathsHorizontal[j][i]);
+      // TODO: can we change j + 1 to j?
+      const [x0, y0] = blockIndexToCoord(i, j + 1, board_y_offset);
+      const [x1, y1] = blockIndexToCoord(i + 1, j + 1, board_y_offset);
+      lightPathGraphics.lineStyle(LIGHT_WIDTH, colour);
+      lightPathGraphics.lineBetween(x0, y0, x1, y1);
     }
   }
   const pathsVertical = solution.pathsVertical();
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n + 1; j++) {
-      const colour = light_to_colour(pathsVertical[j][i])
-      if (colour != BLACK) {
-        // TODO: can we change i + 1 to i?
-        const [x0, y0] = blockIndexToCoord(i + 1, j, board_y_offset);
-        const [x1, y1] = blockIndexToCoord(i + 1, j + 1, board_y_offset);
-        lightPathGraphics.lineStyle(LIGHT_WIDTH, colour);
-        lightPathGraphics.lineBetween(x0, y0, x1, y1);
-      }
+      const colour = light_to_colour(pathsVertical[j][i]);
+      // TODO: can we change i + 1 to i?
+      const [x0, y0] = blockIndexToCoord(i + 1, j, board_y_offset);
+      const [x1, y1] = blockIndexToCoord(i + 1, j + 1, board_y_offset);
+      lightPathGraphics.lineStyle(LIGHT_WIDTH, colour);
+      lightPathGraphics.lineBetween(x0, y0, x1, y1);
     }
   }
 }
@@ -378,7 +374,7 @@ class PlayScene extends Phaser.Scene {
 
   create() {
     const puzzle = new Puzzle(this.cache.json.get("puzzle"));
-    console.log(puzzle)
+    console.log(puzzle);
     const solution = puzzle.solution;
     const n = puzzle.n;
     const board = new Board();
