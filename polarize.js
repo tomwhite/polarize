@@ -4,7 +4,7 @@
 const SCALE = 2;
 
 const SCREEN_WIDTH = 240 * SCALE;
-const SCREEN_HEIGHT = 400 * SCALE;
+const SCREEN_HEIGHT = 440 * SCALE;
 
 const BLOCK_SIZE = 40 * SCALE;
 const CELL_SIZE = 38 * SCALE;
@@ -345,6 +345,24 @@ function drawLightPaths(n, lightPathGraphics, solution, board_y_offset) {
   }
 }
 
+// Utility functions
+
+// Format a date in ISO format (YYYY-MM-DD) according to local time
+// From https://stackoverflow.com/a/50130338
+function formatDate(date) {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split("T")[0];
+}
+
+// Return "today" in YYYY-MM-DD
+// Allow overriding with url param ?date=YYYY-MM-DD
+function getEffectiveDate() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const dateParam = urlParams.get("date");
+  return dateParam ? dateParam : formatDate(new Date());
+}
+
 // Scenes
 
 class PlayScene extends Phaser.Scene {
@@ -353,8 +371,9 @@ class PlayScene extends Phaser.Scene {
   }
 
   preload() {
+    const today = getEffectiveDate();
     this.load.image("help", "sprites/help.png");
-    this.load.json("puzzle", `puzzles/puzzle-2025-01-05.json`);
+    this.load.json("puzzle", `puzzles/puzzle-${today}.json`);
   }
 
   create() {
