@@ -490,45 +490,56 @@ class PlayScene extends Phaser.Scene {
       gameObject.y = dragY;
     });
 
-    this.input.on("dragend", function (pointer, gameObject, dropped) {
-      // snap to board coordinates
-      const x = Phaser.Math.Snap.To(gameObject.x, BLOCK_SIZE);
-      const y = Phaser.Math.Snap.To(gameObject.y, BLOCK_SIZE);
-      // find board index
-      i = x / BLOCK_SIZE - 1;
-      j = y / BLOCK_SIZE - 2;
-      // remove domino from board if already on there
-      const prevPlacedDomino = gameObject.data.get("placedDomino");
-      if (prevPlacedDomino !== undefined) {
-        if (board.canRemove(prevPlacedDomino)) {
-          board.remove(prevPlacedDomino);
-        }
-      }
-      // try to add domino to board in new position
-      const domino = gameObject.data.get("domino");
-      const newPlacedDomino = new PlacedDomino(domino, i, j);
-      if (board.canAdd(newPlacedDomino)) {
-        // can add to board
-        board.add(newPlacedDomino);
-        gameObject.setData("placedDomino", newPlacedDomino);
-        gameObject.x = x;
-        gameObject.y = y;
-      } else {
-        // cannot add to board - reset to previous
+    this.input.on(
+      "dragend",
+      function (pointer, gameObject, dropped) {
+        // snap to board coordinates
+        const x = Phaser.Math.Snap.To(gameObject.x, BLOCK_SIZE);
+        const y = Phaser.Math.Snap.To(gameObject.y, BLOCK_SIZE);
+        // find board index
+        i = x / BLOCK_SIZE - 1;
+        j = y / BLOCK_SIZE - 2;
+        // remove domino from board if already on there
+        const prevPlacedDomino = gameObject.data.get("placedDomino");
         if (prevPlacedDomino !== undefined) {
-          board.add(prevPlacedDomino);
+          if (board.canRemove(prevPlacedDomino)) {
+            board.remove(prevPlacedDomino);
+          }
         }
-        gameObject.x = gameObject.input.dragStartX;
-        gameObject.y = gameObject.input.dragStartY;
-      }
-      console.log(board.values);
-      console.log(board.lights());
-      if (JSON.stringify(board.lights()) == JSON.stringify(puzzle.lights)) {
-        cellGraphics.visible = false;
-        lightPathGraphics.visible = true;
-        gameOver = true;
-      }
-    });
+        // try to add domino to board in new position
+        const domino = gameObject.data.get("domino");
+        const newPlacedDomino = new PlacedDomino(domino, i, j);
+        if (board.canAdd(newPlacedDomino)) {
+          // can add to board
+          board.add(newPlacedDomino);
+          gameObject.setData("placedDomino", newPlacedDomino);
+          gameObject.x = x;
+          gameObject.y = y;
+        } else {
+          // cannot add to board - reset to previous
+          if (prevPlacedDomino !== undefined) {
+            board.add(prevPlacedDomino);
+          }
+          gameObject.x = gameObject.input.dragStartX;
+          gameObject.y = gameObject.input.dragStartY;
+        }
+        console.log(board.values);
+        console.log(board.lights());
+        if (JSON.stringify(board.lights()) == JSON.stringify(puzzle.lights)) {
+          cellGraphics.visible = false;
+          lightPathGraphics.visible = true;
+          gameOver = true;
+          // disable dragging
+          let images = this.children.list.filter(
+            (x) => x instanceof Phaser.GameObjects.Image
+          );
+          images.forEach((image) =>
+            image.input ? this.input.setDraggable(image, false) : null
+          );
+        }
+      },
+      this
+    );
   }
 }
 
