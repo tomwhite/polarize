@@ -14,12 +14,12 @@ const SPOT_RADIUS = 12 * SCALE;
 
 // Names are from https://api.arcade.academy/en/2.6.17/arcade.color.html
 const WHITE = 0xffffff;
-const BLACK_OLIVE = 0x3b3c36;
-const ELECTRIC_YELLOW = 0xffff00;
-const MIKADO_YELLOW = 0xffc40c;
-const LIGHT_GRAY = 0xd3d3d3;
-const DARK_GRAY = 0xa9a9a9;
 const BLACK = 0x000000;
+const BACKGROUND_COLOUR = 0x00adf2; // sky colour
+const CELL_COLOUR = 0xd3d3d3; // LIGHT_GRAY
+const LIGHT_COLOUR = 0xffff00; // ELECTRIC_YELLOW
+const DIM_LIGHT_COLOUR = 0xbfa106; // interpolate between MIKADO_YELLOW (0xbfa106) and 0x808000
+const DARK_COLOUR = BLACK;
 
 // Model classes
 
@@ -266,18 +266,18 @@ function drawLights(n, lightsGraphics, puzzle, board_y_offset) {
   li = puzzle.lights;
   function light_to_colour(li) {
     if (li == 0) {
-      return ELECTRIC_YELLOW;
+      return LIGHT_COLOUR;
     } else if (li == 1) {
-      return MIKADO_YELLOW;
+      return DIM_LIGHT_COLOUR;
     } else {
-      return BLACK;
+      return DARK_COLOUR;
     }
   }
   // TODO: make the following more consistent
   let i = 0;
   for (let j = 0; j < n; j++) {
     let [x, y] = blockIndexToCoord(i, j, board_y_offset);
-    lightsGraphics.lineStyle(LIGHT_WIDTH, ELECTRIC_YELLOW);
+    lightsGraphics.lineStyle(LIGHT_WIDTH, LIGHT_COLOUR);
     lightsGraphics.lineBetween(
       LIGHT_WIDTH,
       BLOCK_SIZE + y,
@@ -292,7 +292,7 @@ function drawLights(n, lightsGraphics, puzzle, board_y_offset) {
   let j = 0;
   for (let i = 0; i < n; i++) {
     let [x, y] = blockIndexToCoord(i, j, board_y_offset);
-    lightsGraphics.lineStyle(LIGHT_WIDTH, ELECTRIC_YELLOW);
+    lightsGraphics.lineStyle(LIGHT_WIDTH, LIGHT_COLOUR);
     lightsGraphics.lineBetween(
       BLOCK_SIZE + x,
       LIGHT_WIDTH + board_y_offset,
@@ -310,17 +310,17 @@ function drawLightPaths(n, lightPathGraphics, solution, board_y_offset) {
   // TODO: common func
   function light_to_colour(li) {
     if (li == 0) {
-      return ELECTRIC_YELLOW;
+      return LIGHT_COLOUR;
     } else if (li == 1) {
-      return MIKADO_YELLOW;
+      return DIM_LIGHT_COLOUR;
     } else {
-      return BLACK;
+      return DARK_COLOUR;
     }
   }
   // iterate over colours from dark to light, so darker ones are at back
   const pathsHorizontal = solution.pathsHorizontal();
   const pathsVertical = solution.pathsVertical();
-  const colours = [BLACK, MIKADO_YELLOW, ELECTRIC_YELLOW]
+  const colours = [DARK_COLOUR, DIM_LIGHT_COLOUR, LIGHT_COLOUR];
   for (const c of colours) {
     for (let i = 0; i < n + 1; i++) {
       for (let j = 0; j < n; j++) {
@@ -346,7 +346,6 @@ function drawLightPaths(n, lightPathGraphics, solution, board_y_offset) {
         }
       }
     }
-  
   }
 }
 
@@ -411,7 +410,7 @@ class PlayScene extends Phaser.Scene {
 
     // Cells (board)
     const cellGraphics = this.add.graphics();
-    cellGraphics.fillStyle(LIGHT_GRAY);
+    cellGraphics.fillStyle(CELL_COLOUR);
     for (var i = 0; i < n; i++) {
       for (var j = 0; j < n; j++) {
         const [x, y] = blockIndexToCoord(i + 1, j + 1);
@@ -425,7 +424,7 @@ class PlayScene extends Phaser.Scene {
     }
 
     // Cells (off board)
-    cellGraphics.fillStyle(DARK_GRAY);
+    cellGraphics.fillStyle(CELL_COLOUR);
     for (var i = 0; i < n; i++) {
       for (var j = 0; j < n - 1; j++) {
         // TODO: clearer way of specifiying offset
@@ -541,7 +540,7 @@ const config = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  backgroundColor: BLACK_OLIVE,
+  backgroundColor: BACKGROUND_COLOUR,
   scene: [PlayScene],
 };
 
