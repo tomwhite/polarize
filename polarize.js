@@ -15,7 +15,7 @@ const SPOT_RADIUS = 12 * SCALE;
 // Names are from https://api.arcade.academy/en/2.6.17/arcade.color.html
 const WHITE = 0xffffff;
 const BLACK = 0x000000;
-const BACKGROUND_COLOUR = 0x1484CD; // sky colour
+const BACKGROUND_COLOUR = 0x1484cd; // sky colour
 const CELL_COLOUR = 0xb3c6d2; // blue-ish grey
 const LIGHT_COLOUR = 0xffff00; // ELECTRIC_YELLOW
 const DIM_LIGHT_COLOUR = 0xffc40c; // MIKADO_YELLOW
@@ -386,6 +386,7 @@ class PlayScene extends Phaser.Scene {
     const solution = puzzle.solution;
     const n = puzzle.n;
     const board = new Board();
+    const offBoard = new Board();
     const board_y_offset = BLOCK_SIZE;
 
     let gameOver = false;
@@ -441,6 +442,7 @@ class PlayScene extends Phaser.Scene {
     // Dominoes
     const dominoGraphics = this.make.graphics({ x: 0, y: 0, add: false });
     for (const pd of puzzle.initial_placed_dominoes) {
+      offBoard.add(pd);
       const domino = pd.domino;
       drawDomino(dominoGraphics, domino);
       const dominoName = `domino_${domino.value}`;
@@ -462,6 +464,8 @@ class PlayScene extends Phaser.Scene {
         .setInteractive();
       dominoSprite.setOrigin(0, 0);
       dominoSprite.setData("domino", domino);
+      dominoSprite.setData("board", offBoard);
+      dominoSprite.setData("placedDomino", pd);
       this.input.setDraggable(dominoSprite);
     }
 
@@ -499,32 +503,43 @@ class PlayScene extends Phaser.Scene {
         // find board index
         i = x / BLOCK_SIZE - 1;
         j = y / BLOCK_SIZE - 2;
+        // find whether the main board or the off board is the target
+        let targetBoard;
+        if (j < 5) {
+          targetBoard = board;
+        } else {
+          targetBoard = offBoard;
+          j -= 5;
+        }
         // remove domino from board if already on there
+        const prevBoard = gameObject.data.get("board");
         const prevPlacedDomino = gameObject.data.get("placedDomino");
         if (prevPlacedDomino !== undefined) {
-          if (board.canRemove(prevPlacedDomino)) {
-            board.remove(prevPlacedDomino);
+          if (prevBoard.canRemove(prevPlacedDomino)) {
+            prevBoard.remove(prevPlacedDomino);
           }
         }
         // try to add domino to board in new position
         const domino = gameObject.data.get("domino");
         const newPlacedDomino = new PlacedDomino(domino, i, j);
-        if (board.canAdd(newPlacedDomino)) {
+        if (targetBoard.canAdd(newPlacedDomino)) {
           // can add to board
-          board.add(newPlacedDomino);
+          targetBoard.add(newPlacedDomino);
+          gameObject.setData("board", targetBoard);
           gameObject.setData("placedDomino", newPlacedDomino);
           gameObject.x = x;
           gameObject.y = y;
         } else {
           // cannot add to board - reset to previous
           if (prevPlacedDomino !== undefined) {
-            board.add(prevPlacedDomino);
+            prevBoard.add(prevPlacedDomino);
           }
           gameObject.x = gameObject.input.dragStartX;
           gameObject.y = gameObject.input.dragStartY;
         }
         console.log(board.values);
         console.log(board.lights());
+        console.log(offBoard.values);
         if (JSON.stringify(board.lights()) == JSON.stringify(puzzle.lights)) {
           cellGraphics.visible = false;
           lightPathGraphics.visible = true;
