@@ -208,6 +208,16 @@ function blockIndexToCoord(i, j, y_offset = BLOCK_SIZE) {
   return [x, y + y_offset];
 }
 
+function light_to_colour(li) {
+  if (li == 0) {
+    return LIGHT_COLOUR;
+  } else if (li == 1) {
+    return DIM_LIGHT_COLOUR;
+  } else {
+    return DARK_COLOUR;
+  }
+}
+
 function drawDomino(graphics, domino) {
   const BLOCK_H = BLOCK_SIZE / 2;
   const BLOCK_3Q = BLOCK_SIZE + BLOCK_H;
@@ -264,15 +274,6 @@ function drawDomino(graphics, domino) {
 
 function drawLights(n, lightsGraphics, puzzle, board_y_offset) {
   li = puzzle.lights;
-  function light_to_colour(li) {
-    if (li == 0) {
-      return LIGHT_COLOUR;
-    } else if (li == 1) {
-      return DIM_LIGHT_COLOUR;
-    } else {
-      return DARK_COLOUR;
-    }
-  }
   // TODO: make the following more consistent
   let i = 0;
   for (let j = 0; j < n; j++) {
@@ -307,16 +308,6 @@ function drawLights(n, lightsGraphics, puzzle, board_y_offset) {
 }
 
 function drawLightPaths(n, lightPathGraphics, solution, board_y_offset) {
-  // TODO: common func
-  function light_to_colour(li) {
-    if (li == 0) {
-      return LIGHT_COLOUR;
-    } else if (li == 1) {
-      return DIM_LIGHT_COLOUR;
-    } else {
-      return DARK_COLOUR;
-    }
-  }
   // iterate over colours from dark to light, so darker ones are at back
   const pathsHorizontal = solution.pathsHorizontal();
   const pathsVertical = solution.pathsVertical();
