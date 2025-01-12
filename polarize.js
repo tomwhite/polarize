@@ -15,10 +15,10 @@ const SPOT_RADIUS = 12 * SCALE;
 // Names are from https://api.arcade.academy/en/2.6.17/arcade.color.html
 const WHITE = 0xffffff;
 const BLACK = 0x000000;
-const BACKGROUND_COLOUR = 0x00adf2; // sky colour
-const CELL_COLOUR = 0xd3d3d3; // LIGHT_GRAY
+const BACKGROUND_COLOUR = 0x1484CD; // sky colour
+const CELL_COLOUR = 0xb3c6d2; // blue-ish grey
 const LIGHT_COLOUR = 0xffff00; // ELECTRIC_YELLOW
-const DIM_LIGHT_COLOUR = 0xbfa106; // interpolate between MIKADO_YELLOW (0xbfa106) and 0x808000
+const DIM_LIGHT_COLOUR = 0xffc40c; // MIKADO_YELLOW
 const DARK_COLOUR = BLACK;
 
 // Model classes
