@@ -11,4 +11,5 @@ def test_puzzle_features():
     features = puzzle_features(puzzle)
 
     assert features["num_dominoes"] == 3
+    assert features["num_distinct_dominoes"] == 2
     assert features["num_yellow_spots"] == 2
