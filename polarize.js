@@ -392,9 +392,18 @@ class PlayScene extends Phaser.Scene {
     let gameOver = false;
     //   let seenFirstMove = false;
 
-    //   // Logo
-    //   const logo = this.add.image(SCREEN_WIDTH / 2, BLOCK_SIZE / 2, "logo");
-    //   logo.setScale(SCALE);
+    // Title
+    const titleStyle = {
+      fontFamily: "monospace",
+      fontSize: 30 * SCALE,
+      color: "yellow",
+      padding: {
+        bottom: 2,
+      },
+    };
+    this.add
+      .text(SCREEN_WIDTH / 2, BLOCK_SIZE / 2, "POLARIZE", titleStyle)
+      .setOrigin(0.5);
 
     // Lights
     const lightsGraphics = this.add.graphics();
