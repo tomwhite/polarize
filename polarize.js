@@ -278,26 +278,13 @@ function drawLights(n, lightsGraphics, puzzle, board_y_offset) {
   let i = 0;
   for (let j = 0; j < n; j++) {
     let [x, y] = blockIndexToCoord(i, j, board_y_offset);
-    // arrow
-    lightsGraphics.fillStyle(LIGHT_COLOUR);
-    const triangle = new Phaser.Geom.Polygon([
-      BLOCK_SIZE - 1.5 * LIGHT_WIDTH,
-      BLOCK_SIZE / 2 + LIGHT_WIDTH / 2 + y,
-      BLOCK_SIZE - 1.5 * LIGHT_WIDTH,
-      BLOCK_SIZE + BLOCK_SIZE / 2 - LIGHT_WIDTH / 2 + y,
-      BLOCK_SIZE,
-      BLOCK_SIZE + y,
-    ]);
-    lightsGraphics.fillPoints(triangle.points, true);
-    // line
     lightsGraphics.lineStyle(LIGHT_WIDTH, LIGHT_COLOUR);
     lightsGraphics.lineBetween(
       LIGHT_WIDTH,
       BLOCK_SIZE + y,
-      BLOCK_SIZE - LIGHT_WIDTH,
+      BLOCK_SIZE,
       BLOCK_SIZE + y
     );
-    // spot
     i = n + 1;
     [x, y] = blockIndexToCoord(i, j, board_y_offset);
     lightsGraphics.fillStyle(light_to_colour(li[j]));
@@ -306,26 +293,13 @@ function drawLights(n, lightsGraphics, puzzle, board_y_offset) {
   let j = 0;
   for (let i = 0; i < n; i++) {
     let [x, y] = blockIndexToCoord(i, j, board_y_offset);
-    // arrow
-    lightsGraphics.fillStyle(LIGHT_COLOUR);
-    const triangle = new Phaser.Geom.Polygon([
-      BLOCK_SIZE / 2 + LIGHT_WIDTH / 2 + x,
-      BLOCK_SIZE - 1.5 * LIGHT_WIDTH + board_y_offset,
-      BLOCK_SIZE + BLOCK_SIZE / 2 - LIGHT_WIDTH / 2 + x,
-      BLOCK_SIZE - 1.5 * LIGHT_WIDTH + board_y_offset,
-      BLOCK_SIZE + x,
-      BLOCK_SIZE + board_y_offset,
-    ]);
-    lightsGraphics.fillPoints(triangle.points, true);
-    // line
     lightsGraphics.lineStyle(LIGHT_WIDTH, LIGHT_COLOUR);
     lightsGraphics.lineBetween(
       BLOCK_SIZE + x,
       LIGHT_WIDTH + board_y_offset,
       BLOCK_SIZE + x,
-      BLOCK_SIZE - LIGHT_WIDTH + board_y_offset
+      BLOCK_SIZE + board_y_offset
     );
-    // spot
     j = n;
     [x, y] = blockIndexToCoord(i, j, board_y_offset);
     lightsGraphics.fillStyle(light_to_colour(li[n + i]));
