@@ -1,0 +1,1 @@
+{"n": 4, "lights": [1, 1, 1, 1, 2, 0, 1, 1], "dominoes": [6, 0, 6, 0], "initial_placed_dominoes": [{"domino": 6, "i": 1, "j": 0}, {"domino": 0, "i": 2, "j": 0}, {"domino": 0, "i": 2, "j": 1}, {"domino": 6, "i": 0, "j": 0}], "solution": [[2, 0, 0, 0], [1, 0, 1, 1], [2, 0, 0, 0], [1, 0, 1, 1]]}
