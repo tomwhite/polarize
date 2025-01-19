@@ -12,6 +12,11 @@ const CELL_SIZE = 38 * SCALE;
 const LIGHT_WIDTH = 10 * SCALE;
 const SPOT_RADIUS = 12 * SCALE;
 
+const FILTER_R = 14 * SCALE;
+
+const BLOCK_H = BLOCK_SIZE / 2;
+const BLOCK_3Q = BLOCK_SIZE + BLOCK_H;
+
 // Names are from https://api.arcade.academy/en/2.6.17/arcade.color.html
 const WHITE = 0xffffff;
 const BLACK = 0x000000;
@@ -203,8 +208,8 @@ function bitwise_count(n) {
 // Drawing functions
 
 function blockIndexToCoord(i, j, y_offset = BLOCK_SIZE) {
-  const x = i * BLOCK_SIZE + BLOCK_SIZE / 2;
-  const y = j * BLOCK_SIZE + BLOCK_SIZE / 2;
+  const x = i * BLOCK_SIZE + BLOCK_H;
+  const y = j * BLOCK_SIZE + BLOCK_H;
   return [x, y + y_offset];
 }
 
@@ -218,12 +223,55 @@ function light_to_colour(li) {
   }
 }
 
+function drawTitle(scene) {
+  const titleStyle = {
+    fontFamily: "monospace",
+    fontSize: 30 * SCALE,
+    color: "yellow",
+    padding: {
+      bottom: 2,
+    },
+  };
+  scene.add
+    .text(SCREEN_WIDTH / 2, BLOCK_H, "POLARIZE", titleStyle)
+    .setOrigin(0.5);
+}
+
+function drawText(scene, text, x, y) {
+  const TEXT_STYLE_10_PT = {
+    fontFamily: "Arial",
+    fontSize: 10 * SCALE,
+    color: "white",  // TODO
+    padding: {
+      bottom: 2,
+    },
+  };
+  scene.add.text(x, y, text, TEXT_STYLE_10_PT);
+}
+
+function drawFilter(graphics, filter, dx, dy) {
+  graphics.lineStyle(3 * SCALE, BLACK);
+  graphics.fillStyle(WHITE);
+
+  graphics.fillCircle(BLOCK_H + dx, BLOCK_H + dy, FILTER_R);
+  graphics.strokeCircle(BLOCK_H + dx, BLOCK_H + dy, FILTER_R);
+
+  const A = (10 - 3) * SCALE;
+  const B = (30 - 3) * SCALE;
+  const C = (10 + 3) * SCALE;
+  const D = (30 + 3) * SCALE;
+  if (filter == Filter.POS_45) {
+    graphics.lineBetween(A + dx, B + dy, B + dx, A + dy);
+    graphics.lineBetween(C + dx, D + dy, D + dx, C + dy);
+  } else {
+    graphics.lineBetween(C + dx, A + dy, D + dx, B + dy);
+    graphics.lineBetween(A + dx, C + dy, B + dx, D + dy);
+  }
+}
+
 function drawDomino(graphics, domino) {
-  const BLOCK_H = BLOCK_SIZE / 2;
-  const BLOCK_3Q = BLOCK_SIZE + BLOCK_H;
-  const CIRCLE_R = 14 * SCALE;
-  const OFF1 = BLOCK_H - CIRCLE_R;
-  const OFF2 = BLOCK_H + CIRCLE_R;
+  const OFF1 = BLOCK_H - FILTER_R;
+  const OFF2 = BLOCK_H + FILTER_R;
 
   let dx, dy;
   if (domino.orientation == Orientation.H) {
@@ -245,69 +293,64 @@ function drawDomino(graphics, domino) {
     graphics.lineBetween(OFF2, BLOCK_H, OFF2, BLOCK_3Q);
   }
 
-  // circles
-  graphics.fillCircle(BLOCK_H, BLOCK_H, CIRCLE_R);
-  graphics.fillCircle(BLOCK_H + dx, BLOCK_H + dy, CIRCLE_R);
-  graphics.strokeCircle(BLOCK_H, BLOCK_H, CIRCLE_R);
-  graphics.strokeCircle(BLOCK_H + dx, BLOCK_H + dy, CIRCLE_R);
-
   // filters
-  const A = (10 - 3) * SCALE;
-  const B = (30 - 3) * SCALE;
-  const C = (10 + 3) * SCALE;
-  const D = (30 + 3) * SCALE;
-  if (domino.filter1 == Filter.POS_45) {
-    graphics.lineBetween(A, B, B, A);
-    graphics.lineBetween(C, D, D, C);
-  } else {
-    graphics.lineBetween(C, A, D, B);
-    graphics.lineBetween(A, C, B, D);
-  }
-  if (domino.filter2 == Filter.POS_45) {
-    graphics.lineBetween(A + dx, B + dy, B + dx, A + dy);
-    graphics.lineBetween(C + dx, D + dy, D + dx, C + dy);
-  } else {
-    graphics.lineBetween(C + dx, A + dy, D + dx, B + dy);
-    graphics.lineBetween(A + dx, C + dy, B + dx, D + dy);
+  drawFilter(graphics, domino.filter1, 0, 0);
+  drawFilter(graphics, domino.filter2, dx, dy);
+}
+
+// Used only for help pages
+function drawHorizonatalLightSourceAndSpot(n, graphics, light, board_y_offset) {
+  let [x, y] = blockIndexToCoord(0, 0, board_y_offset + BLOCK_SIZE);
+  graphics.lineStyle(LIGHT_WIDTH, LIGHT_COLOUR);
+  graphics.lineBetween(LIGHT_WIDTH, y, BLOCK_SIZE, y);
+  [x, y] = blockIndexToCoord(n + 1, 0, board_y_offset);
+  graphics.fillStyle(light_to_colour(light));
+  graphics.fillCircle(x, BLOCK_SIZE + y, SPOT_RADIUS);
+}
+
+// Used only for help pages
+function drawHorizontalLightPath(n, graphics, pathsHorizontal, board_y_offset) {
+  for (let i = 0; i < n + 1; i++) {
+    const colour = light_to_colour(pathsHorizontal[i]);
+    // TODO: can we change j + 1 to j?
+    const [x0, y0] = blockIndexToCoord(i, 1, board_y_offset);
+    const [x1, y1] = blockIndexToCoord(i + 1, 1, board_y_offset);
+    graphics.lineStyle(LIGHT_WIDTH, colour);
+    graphics.lineBetween(x0, y0, x1, y1);
   }
 }
 
-function drawLights(n, lightsGraphics, puzzle, board_y_offset) {
+function drawLightSourcesAndSpots(n, graphics, puzzle, board_y_offset) {
   li = puzzle.lights;
   // TODO: make the following more consistent
   let i = 0;
   for (let j = 0; j < n; j++) {
-    let [x, y] = blockIndexToCoord(i, j, board_y_offset);
-    lightsGraphics.lineStyle(LIGHT_WIDTH, LIGHT_COLOUR);
-    lightsGraphics.lineBetween(
-      LIGHT_WIDTH,
-      BLOCK_SIZE + y,
-      BLOCK_SIZE,
-      BLOCK_SIZE + y
-    );
+    let [x, y] = blockIndexToCoord(i, j, board_y_offset + BLOCK_SIZE);
+    graphics.lineStyle(LIGHT_WIDTH, LIGHT_COLOUR);
+    graphics.lineBetween(LIGHT_WIDTH, y, BLOCK_SIZE, y);
     i = n + 1;
     [x, y] = blockIndexToCoord(i, j, board_y_offset);
-    lightsGraphics.fillStyle(light_to_colour(li[j]));
-    lightsGraphics.fillCircle(x, BLOCK_SIZE + y, SPOT_RADIUS);
+    graphics.fillStyle(light_to_colour(li[j]));
+    graphics.fillCircle(x, BLOCK_SIZE + y, SPOT_RADIUS);
   }
   let j = 0;
   for (let i = 0; i < n; i++) {
-    let [x, y] = blockIndexToCoord(i, j, board_y_offset);
-    lightsGraphics.lineStyle(LIGHT_WIDTH, LIGHT_COLOUR);
-    lightsGraphics.lineBetween(
-      BLOCK_SIZE + x,
+    let [x, y] = blockIndexToCoord(i + 1, j, board_y_offset);
+    graphics.lineStyle(LIGHT_WIDTH, LIGHT_COLOUR);
+    graphics.lineBetween(
+      x,
       LIGHT_WIDTH + board_y_offset,
-      BLOCK_SIZE + x,
+      x,
       BLOCK_SIZE + board_y_offset
     );
     j = n;
     [x, y] = blockIndexToCoord(i, j, board_y_offset);
-    lightsGraphics.fillStyle(light_to_colour(li[n + i]));
-    lightsGraphics.fillCircle(BLOCK_SIZE + x, BLOCK_SIZE + y, SPOT_RADIUS);
+    graphics.fillStyle(light_to_colour(li[n + i]));
+    graphics.fillCircle(BLOCK_SIZE + x, BLOCK_SIZE + y, SPOT_RADIUS);
   }
 }
 
-function drawLightPaths(n, lightPathGraphics, solution, board_y_offset) {
+function drawLightPaths(n, graphics, solution, board_y_offset) {
   // iterate over colours from dark to light, so darker ones are at back
   const pathsHorizontal = solution.pathsHorizontal();
   const pathsVertical = solution.pathsVertical();
@@ -320,8 +363,8 @@ function drawLightPaths(n, lightPathGraphics, solution, board_y_offset) {
           // TODO: can we change j + 1 to j?
           const [x0, y0] = blockIndexToCoord(i, j + 1, board_y_offset);
           const [x1, y1] = blockIndexToCoord(i + 1, j + 1, board_y_offset);
-          lightPathGraphics.lineStyle(LIGHT_WIDTH, colour);
-          lightPathGraphics.lineBetween(x0, y0, x1, y1);
+          graphics.lineStyle(LIGHT_WIDTH, colour);
+          graphics.lineBetween(x0, y0, x1, y1);
         }
       }
     }
@@ -332,8 +375,8 @@ function drawLightPaths(n, lightPathGraphics, solution, board_y_offset) {
           // TODO: can we change i + 1 to i?
           const [x0, y0] = blockIndexToCoord(i + 1, j, board_y_offset);
           const [x1, y1] = blockIndexToCoord(i + 1, j + 1, board_y_offset);
-          lightPathGraphics.lineStyle(LIGHT_WIDTH, colour);
-          lightPathGraphics.lineBetween(x0, y0, x1, y1);
+          graphics.lineStyle(LIGHT_WIDTH, colour);
+          graphics.lineBetween(x0, y0, x1, y1);
         }
       }
     }
@@ -384,21 +427,11 @@ class PlayScene extends Phaser.Scene {
     //   let seenFirstMove = false;
 
     // Title
-    const titleStyle = {
-      fontFamily: "monospace",
-      fontSize: 30 * SCALE,
-      color: "yellow",
-      padding: {
-        bottom: 2,
-      },
-    };
-    this.add
-      .text(SCREEN_WIDTH / 2, BLOCK_SIZE / 2, "POLARIZE", titleStyle)
-      .setOrigin(0.5);
+    drawTitle(this);
 
     // Lights
     const lightsGraphics = this.add.graphics();
-    drawLights(n, lightsGraphics, puzzle, board_y_offset);
+    drawLightSourcesAndSpots(n, lightsGraphics, puzzle, board_y_offset);
 
     //   // Board lines
     //   const boardGraphics = this.add.graphics();
