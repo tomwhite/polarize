@@ -2,11 +2,25 @@ import numpy as np
 from numpy.testing import assert_array_equal
 from rich.console import Console
 
-from polarize.model import Board, PlacedDomino, ALL_DOMINOES
+from polarize.model import Board, Filter, Orientation, PlacedDomino, ALL_DOMINOES
+
+
+def test_filter():
+    assert Filter.POS_45.value == 1
+    assert Filter.NEG_45.value == 2
+    assert Filter.POS_45 < Filter.NEG_45
+
+
+def test_orientation():
+    assert Orientation.H.value == 1
+    assert Orientation.V.value == 2
+    assert Orientation.H < Orientation.V
 
 
 def test_all_dominoes():
     assert len(ALL_DOMINOES) == 8
+    for i in range(len(ALL_DOMINOES) - 1):
+        assert ALL_DOMINOES[i] < ALL_DOMINOES[i + 1]
 
 
 def test_add_domino():

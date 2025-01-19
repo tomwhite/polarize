@@ -69,6 +69,8 @@ def layout(n, dominoes):
 
 
 def generate(n, n_pieces=None):
+    from polarize.solve import has_unique_solution
+
     n_pieces = n_pieces or 3
 
     while True:
@@ -94,8 +96,11 @@ def generate(n, n_pieces=None):
         ind = inds[0]
         board = boards[ind]
 
-        break
+        puzzle = board.to_puzzle()
 
-    puzzle = board.to_puzzle()
+        # check it has a unique solution
+        if has_unique_solution(puzzle, fewer_pieces_allowed=True):
+            break
+
 
     return puzzle, board

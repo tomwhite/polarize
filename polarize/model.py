@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+import functools
 from itertools import product
 import json
 
@@ -9,6 +10,7 @@ from rich.text import Text
 BLOCK = "\u2588"
 
 
+@functools.total_ordering
 class Filter(Enum):
     """A polarizing filter fixed at a given angle."""
 
@@ -21,11 +23,30 @@ class Filter(Enum):
     POS_45 = (1, "/")
     NEG_45 = (2, "\\")
 
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
 
-Orientation = Enum("Orientation", ["H", "V"])
+
+@functools.total_ordering
+class Orientation(Enum):
+    def __new__(cls, value, char):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj.char = char
+        return obj
+
+    H = (1, "H")
+    V = (2, "V")
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class Domino:
     """A domino is made up of two polarizing filters, and is oriented either
     horizontally or vertically."""
