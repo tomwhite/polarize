@@ -68,7 +68,9 @@ class Puzzle {
     this.initial_placed_dominoes = data.initial_placed_dominoes.map(
       (d) => new PlacedDomino(ALL_DOMINOES[d.domino], d.i, d.j)
     );
-    this.solution = new Board(data.n, data.solution);
+    this.solution = new Board(data.n, data.solution.values, data.solution.placed_dominoes.map(
+      (d) => new PlacedDomino(ALL_DOMINOES[d.domino], d.i, d.j)
+    ));
   }
 }
 
@@ -94,9 +96,10 @@ class PlacedDomino {
 }
 
 class Board {
-  constructor(n = 4, values = zeros2D(n, n)) {
+  constructor(n = 4, values = zeros2D(n, n), placedDominoes = []) {
     this.n = n;
     this.values = values;
+    this.placedDominoes = placedDominoes;
   }
 
   canAdd(placedDomino) {
@@ -241,7 +244,7 @@ function drawText(scene, text, x, y) {
   const TEXT_STYLE_10_PT = {
     fontFamily: "Arial",
     fontSize: 10 * SCALE,
-    color: "white",  // TODO
+    color: "white", // TODO
     padding: {
       bottom: 2,
     },
@@ -503,14 +506,14 @@ class PlayScene extends Phaser.Scene {
     }
 
     // Help button
-    // let [x, y] = blockIndexToCoord(5, 0);
-    // const help = this.add.image(x, y, "help").setInteractive();
-    // help.setScale(SCALE);
-    // help.on("pointerup", (e) => {
-    //   this.scene.setVisible(false, "PlayScene");
-    //   this.scene.launch("MenuScene");
-    //   this.scene.pause();
-    // });
+    let [x, y] = blockIndexToCoord(5, 0);
+    const help = this.add.image(x, y, "help").setInteractive();
+    help.setScale(SCALE);
+    help.on("pointerup", (e) => {
+      this.scene.setVisible(false, "PlayScene");
+      this.scene.launch("MenuScene");
+      this.scene.pause();
+    });
 
     this.input.on(
       "dragstart",
@@ -591,6 +594,226 @@ class PlayScene extends Phaser.Scene {
   }
 }
 
+class MenuScene extends Phaser.Scene {
+  constructor() {
+    super({ key: "MenuScene" });
+  }
+
+  preload() {}
+
+  create() {
+    // Title
+    drawTitle(this);
+
+    // let [x, y] = blockIndexToCoord(5, 0);
+    // const close = this.add.image(x, y, "close").setInteractive();
+    // close.setScale(SCALE);
+    // close.on("pointerup", (e) => {
+    //   this.scene.resume("PlayScene");
+    //   this.scene.stop();
+    //   this.scene.setVisible(true, "PlayScene");
+    // });
+
+    const BUTTON_STYLE = {
+      fontFamily: "Arial",
+      fontSize: 16 * SCALE,
+      color: "black",
+      backgroundColor: "#f0f8ff",
+      textDecoration: "none",
+      padding: {
+        y: 12 * SCALE,
+      },
+      align: "center",
+      fixedWidth: 170 * SCALE,
+    };
+
+    let y_offset = BLOCK_SIZE * 2;
+    this.add
+      .text(SCREEN_WIDTH / 2, y_offset, "How to play", BUTTON_STYLE)
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerup", (e) => {
+        this.scene.launch("Help2Scene");
+        this.scene.stop();
+      });
+    // y_offset += BLOCK_SIZE * 1.5;
+    // this.add
+    //   .text(SCREEN_WIDTH / 2, y_offset, "Yesterday's solution", BUTTON_STYLE)
+    //   .setOrigin(0.5)
+    //   .setInteractive()
+    //   .on("pointerup", (e) => {
+    //     this.scene.launch("SolutionScene");
+    //     this.scene.stop();
+    //   });
+  }
+}
+
+class HelpScene extends Phaser.Scene {
+  constructor() {
+    super({ key: "HelpScene" });
+  }
+
+  preload() {}
+
+  create() {
+    // Title
+    drawTitle(this);
+
+    // Lights
+    const n = 4;
+    const graphics = this.add.graphics();
+    let board_y_offset = BLOCK_SIZE;
+    drawText(
+      this,
+      "A yellow light beam shines on a spot",
+      BLOCK_H,
+      board_y_offset + BLOCK_H
+    );
+    drawHorizonatalLightSourceAndSpot(n, graphics, 0, board_y_offset);
+    drawHorizontalLightPath(n, graphics, [0, 0, 0, 0, 0], board_y_offset);
+
+    board_y_offset += 2 * BLOCK_SIZE;
+    drawText(
+      this,
+      "Adding a filter dims the beam to orange",
+      BLOCK_H,
+      board_y_offset + BLOCK_H
+    );
+    drawHorizonatalLightSourceAndSpot(n, graphics, 1, board_y_offset);
+    drawHorizontalLightPath(n, graphics, [0, 0, 1, 1, 1], board_y_offset);
+    drawFilter(
+      graphics,
+      Filter.POS_45,
+      2 * BLOCK_SIZE,
+      board_y_offset + BLOCK_SIZE
+    );
+
+    board_y_offset += 2 * BLOCK_SIZE;
+    drawText(
+      this,
+      "A second identical filter has no further effect",
+      BLOCK_H,
+      board_y_offset + BLOCK_H
+    );
+    drawHorizonatalLightSourceAndSpot(n, graphics, 1, board_y_offset);
+    drawHorizontalLightPath(n, graphics, [0, 0, 1, 1, 1], board_y_offset);
+    drawFilter(
+      graphics,
+      Filter.POS_45,
+      2 * BLOCK_SIZE,
+      board_y_offset + BLOCK_SIZE
+    );
+    drawFilter(
+      graphics,
+      Filter.POS_45,
+      3 * BLOCK_SIZE,
+      board_y_offset + BLOCK_SIZE
+    );
+
+    board_y_offset += 2 * BLOCK_SIZE;
+    drawText(
+      this,
+      "While an opposing filter cuts out all the light",
+      BLOCK_H,
+      board_y_offset + BLOCK_H
+    );
+    drawHorizonatalLightSourceAndSpot(n, graphics, 2, board_y_offset);
+    drawHorizontalLightPath(n, graphics, [0, 0, 1, 2, 2], board_y_offset);
+    drawFilter(
+      graphics,
+      Filter.POS_45,
+      2 * BLOCK_SIZE,
+      board_y_offset + BLOCK_SIZE
+    );
+    drawFilter(
+      graphics,
+      Filter.NEG_45,
+      3 * BLOCK_SIZE,
+      board_y_offset + BLOCK_SIZE
+    );
+  }
+}
+
+class Help2Scene extends Phaser.Scene {
+  constructor() {
+    super({ key: "Help2Scene" });
+  }
+
+  preload() {
+    this.load.json("helpPuzzle", "puzzles/puzzle-2025-01-13.json");
+  }
+
+  create() {
+    const puzzle = new Puzzle(this.cache.json.get("helpPuzzle"));
+    console.log(puzzle);
+    const solution = puzzle.solution;
+    console.log(puzzle.solution.placedDominoes)
+    const n = puzzle.n;
+
+    let board_y_offset = BLOCK_SIZE;
+    drawText(
+      this,
+      "Light beams shine across and down",
+      BLOCK_H,
+      board_y_offset + BLOCK_H
+    );
+
+    board_y_offset += BLOCK_SIZE;
+
+    // Title
+    drawTitle(this);
+
+    // Lights
+    const lightsGraphics = this.add.graphics();
+    drawLightSourcesAndSpots(n, lightsGraphics, puzzle, board_y_offset);
+
+    // Light paths
+    const lightPathGraphics = this.add.graphics();
+    drawLightPaths(n, lightPathGraphics, solution, board_y_offset);
+
+    // Dominoes
+    const dominoGraphics = this.make.graphics({ x: 0, y: 0, add: false });
+    for (const pd of solution.placedDominoes) {
+      const domino = pd.domino;
+      drawDomino(dominoGraphics, domino);
+      const dominoName = `domino_${domino.value}`;
+      // TODO: make this a bit more concise
+      if (domino.orientation == Orientation.H) {
+        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE * 2, BLOCK_SIZE);
+      } else {
+        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE, BLOCK_SIZE * 2);
+      }
+
+      // TODO: arithmetic is a mess here again
+      let [x, y] = blockIndexToCoord(
+        pd.i + 1,
+        pd.j,
+        BLOCK_SIZE + board_y_offset
+      );
+      const dominoSprite = this.add
+        .image(x - CELL_SIZE / 2, y - CELL_SIZE / 2, dominoName);
+      dominoSprite.setOrigin(0, 0);
+    }
+
+    board_y_offset += (n + 2) * BLOCK_SIZE;
+    drawText(
+      this,
+      "The goal is to place the paired filters so the ",
+      BLOCK_H,
+      board_y_offset + BLOCK_H
+    );
+
+    board_y_offset += BLOCK_H;
+    drawText(
+      this,
+      "lights and the spots match, as shown here.",
+      BLOCK_H,
+      board_y_offset + BLOCK_H
+    );
+
+  }
+}
+
 const config = {
   type: Phaser.AUTO,
   width: SCREEN_WIDTH,
@@ -600,7 +823,7 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   backgroundColor: BACKGROUND_COLOUR,
-  scene: [PlayScene],
+  scene: [PlayScene, MenuScene, HelpScene, Help2Scene],
 };
 
 const game = new Phaser.Game(config);
