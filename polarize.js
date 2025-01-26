@@ -506,14 +506,14 @@ class PlayScene extends Phaser.Scene {
     }
 
     // Help button
-    let [x, y] = blockIndexToCoord(5, 0);
-    const help = this.add.image(x, y, "help").setInteractive();
-    help.setScale(SCALE);
-    help.on("pointerup", (e) => {
-      this.scene.setVisible(false, "PlayScene");
-      this.scene.launch("MenuScene");
-      this.scene.pause();
-    });
+    // let [x, y] = blockIndexToCoord(5, 0);
+    // const help = this.add.image(x, y, "help").setInteractive();
+    // help.setScale(SCALE);
+    // help.on("pointerup", (e) => {
+    //   this.scene.setVisible(false, "PlayScene");
+    //   this.scene.launch("MenuScene");
+    //   this.scene.pause();
+    // });
 
     this.input.on(
       "dragstart",
