@@ -177,9 +177,14 @@ class Board:
     def __init__(self, n=4):
         self.n = n
         self.values = np.zeros((n, n), dtype=np.int8)
-        self.colours = np.zeros((n, n), dtype=np.int8)
-        self.n_dominoes = 0
         self.placed_dominoes = set()
+
+    @property
+    def colours(self):
+        c = np.zeros((self.n, self.n), dtype=np.int8)
+        for i, pd in enumerate(self.placed_dominoes):
+            c[pd.np_index] = i + 1
+        return c
 
     def can_add(self, placed_domino):
         try:
@@ -193,8 +198,6 @@ class Board:
             domino.filter1.value,
             domino.filter2.value,
         ]
-        self.colours[placed_domino.np_index] = self.n_dominoes + 1
-        self.n_dominoes += 1
         self.placed_dominoes.add(placed_domino)
 
     def can_remove(self, placed_domino):
@@ -209,8 +212,6 @@ class Board:
 
     def remove_domino(self, placed_domino):
         self.values[placed_domino.np_index] = 0
-        self.colours[placed_domino.np_index] = 0
-        self.n_dominoes -= 1
         self.placed_dominoes.remove(placed_domino)
 
     def on_board(self, x, y):
@@ -261,10 +262,11 @@ class Board:
 
     def __rich__(self):
         text = Text()
+        colours = self.colours
         for y in range(self.n):
             for x in range(self.n):
                 v = self.values[y, x]
-                c = self.colours[y, x]
+                c = colours[y, x]
                 if v == 0:
                     text.append(".")
                 else:
