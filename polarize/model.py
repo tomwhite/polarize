@@ -97,13 +97,23 @@ class Puzzle:
     @classmethod
     def from_json_str(cls, json_str):
         data = json.loads(json_str)
-        return cls(n=data["n"], lights=data["lights"], dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]], initial_placed_dominoes=[PlacedDomino(ALL_DOMINOES[d["domino"]],d["i"], d["j"]) for d in data["initial_placed_dominoes"]], solution=data["solution"])
+        return cls.from_json_dict(data)
 
-    # TODO: reduce duplication
     @classmethod
     def from_json_file(cls, filename):
         data = json.load(filename)
-        return cls(n=data["n"], lights=data["lights"], dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]], initial_placed_dominoes=[PlacedDomino(ALL_DOMINOES[d["domino"]],d["i"], d["j"]) for d in data["initial_placed_dominoes"]], solution=data["solution"])
+        return cls.from_json_dict(data)
+
+    @classmethod
+    def from_json_dict(cls, data):
+        return cls(
+            n=data["n"],
+            lights=data["lights"],
+            dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]],
+            initial_placed_dominoes=[PlacedDomino.from_json_dict(d) for d in data["initial_placed_dominoes"]],
+            solution=Board(data["n"], np.array(data["solution"]["values"], dtype=np.int8), 
+                           set(PlacedDomino.from_json_dict(d) for d in data["solution"]["placed_dominoes"]))
+        )
 
     def to_json_dict(self):
         return {
@@ -111,7 +121,10 @@ class Puzzle:
             "lights": self.lights.tolist(),
             "dominoes": [d.value for d in self.dominoes],
             "initial_placed_dominoes": [{"domino": pd.domino.value, "i": pd.x, "j": pd.y} for pd in self.initial_placed_dominoes],
-            "solution": self.solution,
+            "solution": {
+                "values": self.solution.values.tolist(),
+                "placed_dominoes": [{"domino": pd.domino.value, "i": pd.x, "j": pd.y} for pd in self.solution.placed_dominoes]
+            }
         }
     
     @property
@@ -170,14 +183,17 @@ class PlacedDomino:
             x2, y2 = x, y + 1
         return np.array([y, y2]), np.array([x, x2])
 
+    @classmethod
+    def from_json_dict(cls, data):
+        return PlacedDomino(ALL_DOMINOES[data["domino"]],data["i"], data["j"])
 
 class Board:
     """A Polarize board consists of a set of placed dominoes."""
 
-    def __init__(self, n=4):
+    def __init__(self, n=4, values=None, placed_dominoes=None):
         self.n = n
-        self.values = np.zeros((n, n), dtype=np.int8)
-        self.placed_dominoes = set()
+        self.values = values if values is not None else np.zeros((n, n), dtype=np.int8)
+        self.placed_dominoes = placed_dominoes if placed_dominoes is not None else set()
 
     @property
     def colours(self):
@@ -255,7 +271,7 @@ class Board:
         from polarize.generate import layout
 
         initial_board = layout(self.n, dominoes)
-        return Puzzle(self.n, self.lights, dominoes, initial_board.placed_dominoes, self.values.tolist())
+        return Puzzle(self.n, self.lights, dominoes, initial_board.placed_dominoes, self)
 
     def __str__(self):
         return str(self.values)
