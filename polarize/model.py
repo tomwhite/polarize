@@ -86,7 +86,7 @@ ALL_DOMINOES = [
 class Puzzle:
     """A Polarize puzzle consists of lights and a multi-set of dominoes."""
 
-    def __init__(self, n, lights, dominoes, initial_placed_dominoes, solution):
+    def __init__(self, n, lights, dominoes, initial_placed_dominoes, solution=None):
         # initial_placed_dominoes is used to arrange the dominoes on the off-board cells
         self.n = n
         self.lights = lights
