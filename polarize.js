@@ -26,6 +26,19 @@ const LIGHT_COLOUR = 0xffff00; // ELECTRIC_YELLOW
 const DIM_LIGHT_COLOUR = 0xffc40c; // MIKADO_YELLOW
 const DARK_COLOUR = BLACK;
 
+const BUTTON_STYLE = {
+  fontFamily: "Arial",
+  fontSize: 16 * SCALE,
+  color: "black",
+  backgroundColor: "#f0f8ff",
+  textDecoration: "none",
+  padding: {
+    y: 12 * SCALE,
+  },
+  align: "center",
+  fixedWidth: 170 * SCALE,
+};
+
 // Model classes
 
 const Filter = Object.freeze({
@@ -68,9 +81,13 @@ class Puzzle {
     this.initial_placed_dominoes = data.initial_placed_dominoes.map(
       (d) => new PlacedDomino(ALL_DOMINOES[d.domino], d.i, d.j)
     );
-    this.solution = new Board(data.n, data.solution.values, data.solution.placed_dominoes.map(
-      (d) => new PlacedDomino(ALL_DOMINOES[d.domino], d.i, d.j)
-    ));
+    this.solution = new Board(
+      data.n,
+      data.solution.values,
+      data.solution.placed_dominoes.map(
+        (d) => new PlacedDomino(ALL_DOMINOES[d.domino], d.i, d.j)
+      )
+    );
   }
 }
 
@@ -506,14 +523,14 @@ class PlayScene extends Phaser.Scene {
     }
 
     // Help button
-    // let [x, y] = blockIndexToCoord(5, 0);
-    // const help = this.add.image(x, y, "help").setInteractive();
-    // help.setScale(SCALE);
-    // help.on("pointerup", (e) => {
-    //   this.scene.setVisible(false, "PlayScene");
-    //   this.scene.launch("MenuScene");
-    //   this.scene.pause();
-    // });
+    let [x, y] = blockIndexToCoord(5, 0);
+    const help = this.add.image(x, y, "help").setInteractive();
+    help.setScale(SCALE);
+    help.on("pointerup", (e) => {
+      this.scene.setVisible(false, "PlayScene");
+      this.scene.launch("MenuScene");
+      this.scene.pause();
+    });
 
     this.input.on(
       "dragstart",
@@ -614,26 +631,13 @@ class MenuScene extends Phaser.Scene {
     //   this.scene.setVisible(true, "PlayScene");
     // });
 
-    const BUTTON_STYLE = {
-      fontFamily: "Arial",
-      fontSize: 16 * SCALE,
-      color: "black",
-      backgroundColor: "#f0f8ff",
-      textDecoration: "none",
-      padding: {
-        y: 12 * SCALE,
-      },
-      align: "center",
-      fixedWidth: 170 * SCALE,
-    };
-
     let y_offset = BLOCK_SIZE * 2;
     this.add
       .text(SCREEN_WIDTH / 2, y_offset, "How to play", BUTTON_STYLE)
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerup", (e) => {
-        this.scene.launch("Help2Scene");
+        this.scene.launch("HowToPlayScene1");
         this.scene.stop();
       });
     // y_offset += BLOCK_SIZE * 1.5;
@@ -648,9 +652,9 @@ class MenuScene extends Phaser.Scene {
   }
 }
 
-class HelpScene extends Phaser.Scene {
+class HowToPlayScene1 extends Phaser.Scene {
   constructor() {
-    super({ key: "HelpScene" });
+    super({ key: "HowToPlayScene1" });
   }
 
   preload() {}
@@ -731,12 +735,22 @@ class HelpScene extends Phaser.Scene {
       3 * BLOCK_SIZE,
       board_y_offset + BLOCK_SIZE
     );
+
+    board_y_offset += 3 * BLOCK_SIZE;
+    this.add
+      .text(SCREEN_WIDTH / 2, board_y_offset, "Next", BUTTON_STYLE)
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerup", (e) => {
+        this.scene.launch("HowToPlayScene2");
+        this.scene.stop();
+      });
   }
 }
 
-class Help2Scene extends Phaser.Scene {
+class HowToPlayScene2 extends Phaser.Scene {
   constructor() {
-    super({ key: "Help2Scene" });
+    super({ key: "HowToPlayScene2" });
   }
 
   preload() {
@@ -747,7 +761,7 @@ class Help2Scene extends Phaser.Scene {
     const puzzle = new Puzzle(this.cache.json.get("helpPuzzle"));
     console.log(puzzle);
     const solution = puzzle.solution;
-    console.log(puzzle.solution.placedDominoes)
+    console.log(puzzle.solution.placedDominoes);
     const n = puzzle.n;
 
     let board_y_offset = BLOCK_SIZE;
@@ -790,12 +804,15 @@ class Help2Scene extends Phaser.Scene {
         pd.j,
         BLOCK_SIZE + board_y_offset
       );
-      const dominoSprite = this.add
-        .image(x - CELL_SIZE / 2, y - CELL_SIZE / 2, dominoName);
+      const dominoSprite = this.add.image(
+        x - CELL_SIZE / 2,
+        y - CELL_SIZE / 2,
+        dominoName
+      );
       dominoSprite.setOrigin(0, 0);
     }
 
-    board_y_offset += (n + 2) * BLOCK_SIZE;
+    board_y_offset += (n + 1.5) * BLOCK_SIZE;
     drawText(
       this,
       "The goal is to place the paired filters so the ",
@@ -811,6 +828,15 @@ class Help2Scene extends Phaser.Scene {
       board_y_offset + BLOCK_H
     );
 
+    board_y_offset += 2 * BLOCK_SIZE;
+    this.add
+      .text(SCREEN_WIDTH / 2, board_y_offset, "Done", BUTTON_STYLE)
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerup", (e) => {
+        this.scene.launch("PlayScene");
+        this.scene.stop();
+      });
   }
 }
 
@@ -823,7 +849,7 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   backgroundColor: BACKGROUND_COLOUR,
-  scene: [PlayScene, MenuScene, HelpScene, Help2Scene],
+  scene: [PlayScene, MenuScene, HowToPlayScene1, HowToPlayScene2],
 };
 
 const game = new Phaser.Game(config);
