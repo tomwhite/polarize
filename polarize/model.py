@@ -108,7 +108,7 @@ class Puzzle:
     def from_json_dict(cls, data):
         return cls(
             n=data["n"],
-            lights=data["lights"],
+            lights=np.array(data["lights"], dtype=np.uint8),
             dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]],
             initial_placed_dominoes=[PlacedDomino.from_json_dict(d) for d in data["initial_placed_dominoes"]],
             solution=Board(data["n"], np.array(data["solution"]["values"], dtype=np.int8), 
