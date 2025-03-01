@@ -1,3 +1,5 @@
+import csv
+from pathlib import Path
 from pprint import pprint
 
 import click
@@ -36,6 +38,30 @@ def play(filename, pieces):
         puzzle, solution = generate_puzzle(4, pieces)
 
     play_game(puzzle, solution)
+
+
+@cli.command()
+@click.argument("directory", type=click.Path(exists=True, file_okay=False))
+@click.argument("output")
+def features(directory, output):
+    """Write puzzle features to a CSV file"""
+    all_features = []
+    files = Path(directory).glob("*.json")
+    for filename in sorted(files):
+        puzzle = load_puzzle(filename)
+        features = puzzle_features(puzzle)
+        features["filename"] = filename.name
+        all_features.append(features)
+
+    with open(output, "w", newline="") as csvfile:
+        fieldnames = list(all_features[0].keys())
+        # make sure "filename is first
+        fieldnames.remove("filename")
+        fieldnames.insert(0, "filename")
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for feature in all_features:
+            writer.writerow(feature)
 
 
 if __name__ == "__main__":
