@@ -83,6 +83,7 @@ class Puzzle {
     );
     this.solution = new Board(
       data.n,
+      data.n,
       data.solution.values,
       data.solution.placed_dominoes.map(
         (d) => new PlacedDomino(ALL_DOMINOES[d.domino], d.i, d.j)
@@ -113,17 +114,21 @@ class PlacedDomino {
 }
 
 class Board {
-  constructor(n = 4, values = zeros2D(n, n), placedDominoes = []) {
+  // Note: m != n is for offBoard (which isn't square) - so it only supports
+  // canAdd, canRemove, but not methods for lights and paths.
+  constructor(n = 4, m = 4, values = zeros2D(n, n), placedDominoes = []) {
     this.n = n;
+    this.m = m;
     this.values = values;
     this.placedDominoes = placedDominoes;
   }
 
   canAdd(placedDomino) {
     const n = this.n;
+    const m = this.m;
     const [[i1, j1], [i2, j2]] = placedDomino.index();
-    if (0 <= i1 && i1 < n && 0 <= j1 && j1 < n) {
-      if (0 <= i2 && i2 < n && 0 <= j2 && j2 < n) {
+    if (0 <= i1 && i1 < n && 0 <= j1 && j1 < m) {
+      if (0 <= i2 && i2 < n && 0 <= j2 && j2 < m) {
         return this.values[j1][i1] == 0 && this.values[j2][i2] == 0;
       }
     }
@@ -138,9 +143,10 @@ class Board {
 
   canRemove(placedDomino) {
     const n = this.n;
+    const m = this.m;
     const [[i1, j1], [i2, j2]] = placedDomino.index();
-    if (0 <= i1 && i1 < n && 0 <= j1 && j1 < n) {
-      if (0 <= i2 && i2 < n && 0 <= j2 && j2 < n) {
+    if (0 <= i1 && i1 < n && 0 <= j1 && j1 < m) {
+      if (0 <= i2 && i2 < n && 0 <= j2 && j2 < m) {
         return (
           this.values[j1][i1] == placedDomino.domino.filter1 &&
           this.values[j2][i2] == placedDomino.domino.filter2
@@ -440,7 +446,7 @@ class PlayScene extends Phaser.Scene {
     const solution = puzzle.solution;
     const n = puzzle.n;
     const board = new Board();
-    const offBoard = new Board();
+    const offBoard = new Board(4, 3);
     const board_y_offset = BLOCK_SIZE;
 
     let gameOver = false;
