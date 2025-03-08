@@ -409,6 +409,21 @@ function drawLightPaths(n, graphics, solution, board_y_offset) {
   }
 }
 
+function drawCells(n, m, graphics, board_y_offset = BLOCK_SIZE) {
+  graphics.fillStyle(CELL_COLOUR);
+  for (var i = 0; i < n; i++) {
+    for (var j = 0; j < m; j++) {
+      const [x, y] = blockIndexToCoord(i + 1, j + 1, board_y_offset);
+      graphics.fillRect(
+        x - CELL_SIZE / 2,
+        y - CELL_SIZE / 2,
+        CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
+}
+
 // Utility functions
 
 // Format a date in ISO format (YYYY-MM-DD) according to local time
@@ -470,33 +485,10 @@ class PlayScene extends Phaser.Scene {
 
     // Cells (board)
     const cellGraphics = this.add.graphics();
-    cellGraphics.fillStyle(CELL_COLOUR);
-    for (var i = 0; i < n; i++) {
-      for (var j = 0; j < n; j++) {
-        const [x, y] = blockIndexToCoord(i + 1, j + 1);
-        cellGraphics.fillRect(
-          x - CELL_SIZE / 2,
-          y - CELL_SIZE / 2,
-          CELL_SIZE,
-          CELL_SIZE
-        );
-      }
-    }
+    drawCells(n, n, cellGraphics)
 
     // Cells (off board)
-    cellGraphics.fillStyle(CELL_COLOUR);
-    for (var i = 0; i < n; i++) {
-      for (var j = 0; j < n - 1; j++) {
-        // TODO: clearer way of specifiying offset
-        const [x, y] = blockIndexToCoord(i + 1, j + 1, BLOCK_SIZE * (n + 2));
-        cellGraphics.fillRect(
-          x - CELL_SIZE / 2,
-          y - CELL_SIZE / 2,
-          CELL_SIZE,
-          CELL_SIZE
-        );
-      }
-    }
+    drawCells(n, n - 1, cellGraphics, BLOCK_SIZE * (n + 2))
 
     // Dominoes
     const dominoGraphics = this.make.graphics({ x: 0, y: 0, add: false });
@@ -560,8 +552,8 @@ class PlayScene extends Phaser.Scene {
         const x = Phaser.Math.Snap.To(gameObject.x, BLOCK_SIZE);
         const y = Phaser.Math.Snap.To(gameObject.y, BLOCK_SIZE);
         // find board index
-        i = x / BLOCK_SIZE - 1;
-        j = y / BLOCK_SIZE - 2;
+        var i = x / BLOCK_SIZE - 1;
+        var j = y / BLOCK_SIZE - 2;
         // find whether the main board or the off board is the target
         let targetBoard;
         if (j < 5) {
