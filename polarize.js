@@ -264,15 +264,15 @@ function drawTitle(scene) {
 }
 
 function drawText(scene, text, x, y) {
-  const TEXT_STYLE_10_PT = {
+  const TEXT_STYLE_12_PT = {
     fontFamily: "Arial",
-    fontSize: 10 * SCALE,
+    fontSize: 12 * SCALE,
     color: "white", // TODO
     padding: {
       bottom: 2,
     },
   };
-  scene.add.text(x, y, text, TEXT_STYLE_10_PT);
+  scene.add.text(x, y, text, TEXT_STYLE_12_PT);
 }
 
 function drawFilter(graphics, filter, dx, dy) {
@@ -695,7 +695,7 @@ class HowToPlayScene1 extends Phaser.Scene {
     board_y_offset += 2 * BLOCK_SIZE;
     drawText(
       this,
-      "A second identical filter has no further effect",
+      "Identical filters have the same effect",
       BLOCK_H,
       board_y_offset + BLOCK_H
     );
@@ -717,7 +717,7 @@ class HowToPlayScene1 extends Phaser.Scene {
     board_y_offset += 2 * BLOCK_SIZE;
     drawText(
       this,
-      "While an opposing filter cuts out all the light",
+      "While opposing filters cut out all light",
       BLOCK_H,
       board_y_offset + BLOCK_H
     );
@@ -815,7 +815,7 @@ class HowToPlayScene2 extends Phaser.Scene {
     board_y_offset += (n + 1.5) * BLOCK_SIZE;
     drawText(
       this,
-      "The goal is to place the paired filters so the ",
+      "The goal is to place the paired filters",
       BLOCK_H,
       board_y_offset + BLOCK_H
     );
@@ -823,7 +823,7 @@ class HowToPlayScene2 extends Phaser.Scene {
     board_y_offset += BLOCK_H;
     drawText(
       this,
-      "lights and the spots match, as shown here.",
+      "so the lights and the spots match",
       BLOCK_H,
       board_y_offset + BLOCK_H
     );
