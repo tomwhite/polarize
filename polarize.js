@@ -272,7 +272,7 @@ function drawText(scene, text, x, y) {
       bottom: 2,
     },
   };
-  scene.add.text(x, y, text, TEXT_STYLE_12_PT);
+  scene.add.text(x, y, text, TEXT_STYLE_12_PT).setOrigin(0.5);
 }
 
 function drawFilter(graphics, filter, dx, dy) {
@@ -640,15 +640,15 @@ class MenuScene extends Phaser.Scene {
         this.scene.launch("HowToPlayScene1");
         this.scene.stop();
       });
-    // y_offset += BLOCK_SIZE * 1.5;
-    // this.add
-    //   .text(SCREEN_WIDTH / 2, y_offset, "Yesterday's solution", BUTTON_STYLE)
-    //   .setOrigin(0.5)
-    //   .setInteractive()
-    //   .on("pointerup", (e) => {
-    //     this.scene.launch("SolutionScene");
-    //     this.scene.stop();
-    //   });
+    y_offset += BLOCK_SIZE * 1.5;
+    this.add
+      .text(SCREEN_WIDTH / 2, y_offset, "Yesterday's solution", BUTTON_STYLE)
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerup", (e) => {
+        this.scene.launch("SolutionScene");
+        this.scene.stop();
+      });
   }
 }
 
@@ -670,7 +670,7 @@ class HowToPlayScene1 extends Phaser.Scene {
     drawText(
       this,
       "A yellow light beam shines on a spot",
-      BLOCK_H,
+      SCREEN_WIDTH / 2,
       board_y_offset + BLOCK_H
     );
     drawHorizonatalLightSourceAndSpot(n, graphics, 0, board_y_offset);
@@ -680,7 +680,7 @@ class HowToPlayScene1 extends Phaser.Scene {
     drawText(
       this,
       "Adding a filter dims the beam to orange",
-      BLOCK_H,
+      SCREEN_WIDTH / 2,
       board_y_offset + BLOCK_H
     );
     drawHorizonatalLightSourceAndSpot(n, graphics, 1, board_y_offset);
@@ -696,7 +696,7 @@ class HowToPlayScene1 extends Phaser.Scene {
     drawText(
       this,
       "Identical filters have the same effect",
-      BLOCK_H,
+      SCREEN_WIDTH / 2,
       board_y_offset + BLOCK_H
     );
     drawHorizonatalLightSourceAndSpot(n, graphics, 1, board_y_offset);
@@ -718,7 +718,7 @@ class HowToPlayScene1 extends Phaser.Scene {
     drawText(
       this,
       "While opposing filters cut out all light",
-      BLOCK_H,
+      SCREEN_WIDTH / 2,
       board_y_offset + BLOCK_H
     );
     drawHorizonatalLightSourceAndSpot(n, graphics, 2, board_y_offset);
@@ -768,7 +768,7 @@ class HowToPlayScene2 extends Phaser.Scene {
     drawText(
       this,
       "Light beams shine across and down",
-      BLOCK_H,
+      SCREEN_WIDTH / 2,
       board_y_offset + BLOCK_H
     );
 
@@ -816,7 +816,7 @@ class HowToPlayScene2 extends Phaser.Scene {
     drawText(
       this,
       "The goal is to place the paired filters",
-      BLOCK_H,
+      SCREEN_WIDTH / 2,
       board_y_offset + BLOCK_H
     );
 
@@ -824,7 +824,7 @@ class HowToPlayScene2 extends Phaser.Scene {
     drawText(
       this,
       "so the lights and the spots match",
-      BLOCK_H,
+      SCREEN_WIDTH / 2,
       board_y_offset + BLOCK_H
     );
 
@@ -840,6 +840,83 @@ class HowToPlayScene2 extends Phaser.Scene {
   }
 }
 
+class SolutionScene extends Phaser.Scene {
+  constructor() {
+    super({ key: "SolutionScene" });
+  }
+
+  preload() {
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = formatDate(yesterdayDate);
+    this.load.json("yesterdayPuzzle", `puzzles/puzzle-${yesterday}.json`);
+    this.load.image("close", "sprites/close-circle-line.png");
+  }
+
+  create() {
+    const puzzle = new Puzzle(this.cache.json.get("yesterdayPuzzle"));
+    const solution = puzzle.solution;
+    const n = puzzle.n;
+
+    let board_y_offset = BLOCK_SIZE;
+    drawText(
+      this,
+      "Yesterday's solution",
+      SCREEN_WIDTH / 2,
+      board_y_offset + BLOCK_H
+    );
+
+    board_y_offset += BLOCK_SIZE;
+
+    // Title
+    drawTitle(this);
+
+    let [x, y] = blockIndexToCoord(5, 0);
+    const close = this.add.image(x, y, "close").setInteractive();
+    close.setScale(SCALE);
+    close.on("pointerup", (e) => {
+      this.scene.resume("PlayScene");
+      this.scene.stop();
+      this.scene.setVisible(true, "PlayScene");
+    });
+
+    // Lights
+    const lightsGraphics = this.add.graphics();
+    drawLightSourcesAndSpots(n, lightsGraphics, puzzle, board_y_offset);
+
+    // Light paths
+    const lightPathGraphics = this.add.graphics();
+    drawLightPaths(n, lightPathGraphics, solution, board_y_offset);
+
+    // Dominoes
+    const dominoGraphics = this.make.graphics({ x: 0, y: 0, add: false });
+    for (const pd of solution.placedDominoes) {
+      const domino = pd.domino;
+      drawDomino(dominoGraphics, domino);
+      const dominoName = `domino_${domino.value}`;
+      // TODO: make this a bit more concise
+      if (domino.orientation == Orientation.H) {
+        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE * 2, BLOCK_SIZE);
+      } else {
+        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE, BLOCK_SIZE * 2);
+      }
+
+      // TODO: arithmetic is a mess here again
+      let [x, y] = blockIndexToCoord(
+        pd.i + 1,
+        pd.j,
+        BLOCK_SIZE + board_y_offset
+      );
+      const dominoSprite = this.add.image(
+        x - CELL_SIZE / 2,
+        y - CELL_SIZE / 2,
+        dominoName
+      );
+      dominoSprite.setOrigin(0, 0);
+    }
+  }
+}
+
 const config = {
   type: Phaser.AUTO,
   width: SCREEN_WIDTH,
@@ -850,7 +927,7 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   backgroundColor: BACKGROUND_COLOUR,
-  scene: [PlayScene, MenuScene, HowToPlayScene1, HowToPlayScene2],
+  scene: [PlayScene, MenuScene, HowToPlayScene1, HowToPlayScene2, SolutionScene],
 };
 
 const game = new Phaser.Game(config);
