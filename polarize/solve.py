@@ -1,4 +1,3 @@
-from collections import Counter
 from itertools import chain, combinations
 
 from polarize.generate import all_boards
