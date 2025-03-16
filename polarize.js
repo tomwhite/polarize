@@ -453,6 +453,7 @@ class PlayScene extends Phaser.Scene {
     const today = getEffectiveDate();
     this.load.image("help", "sprites/help.png");
     this.load.json("puzzle", `puzzles/puzzle-${today}.json`);
+    plausible("preload");
   }
 
   create() {
@@ -602,6 +603,7 @@ class PlayScene extends Phaser.Scene {
           images.forEach((image) =>
             image.input ? this.input.setDraggable(image, false) : null
           );
+          plausible("solved");
         }
       },
       this
