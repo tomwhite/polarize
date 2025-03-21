@@ -5,7 +5,7 @@ from polarize.difficulty import num_valid_domino_places, puzzle_features
 def test_puzzle_features():
     # set on 11 Jan 2025
     puzzle = Puzzle.from_json_str(
-        """{"n": 4, "lights": [1, 1, 1, 2, 2, 1, 0, 0], "dominoes": [6, 6, 7], "initial_placed_dominoes": [{"domino": 6, "i": 0, "j": 0}, {"domino": 6, "i": 1, "j": 0}, {"domino": 7, "i": 2, "j": 0}], "solution": [[2, 0, 0, 0], [1, 0, 0, 0], [2, 2, 0, 0], [1, 2, 0, 0]]}"""
+        """{"n": 4, "lights": [1, 2, 2, 0, 0, 1, 2, 2], "dominoes": [2, 6, 6], "initial_placed_dominoes": [{"domino": 6, "i": 0, "j": 0}, {"domino": 2, "i": 2, "j": 0}, {"domino": 6, "i": 1, "j": 0}], "solution": {"values": [[0, 0, 2, 0], [0, 0, 1, 2], [0, 2, 1, 1], [0, 0, 0, 0]], "placed_dominoes": [{"domino": 2, "i": 1, "j": 2}, {"domino": 6, "i": 3, "j": 1}, {"domino": 6, "i": 2, "j": 0}]}}"""
     )
 
     features = puzzle_features(puzzle)
