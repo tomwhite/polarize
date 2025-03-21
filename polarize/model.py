@@ -23,6 +23,10 @@ class Filter(Enum):
     POS_45 = (1, "/")
     NEG_45 = (2, "\\")
 
+    @property
+    def other(self):
+        return self.POS_45 if self is self.NEG_45 else self.NEG_45
+
     def __lt__(self, other):
         if self.__class__ is other.__class__:
             return self.value < other.value
@@ -39,6 +43,10 @@ class Orientation(Enum):
 
     H = (1, "H")
     V = (2, "V")
+
+    @property
+    def T(self):
+        return self.V if self is self.H else self.H
 
     def __lt__(self, other):
         if self.__class__ is other.__class__:
@@ -64,6 +72,17 @@ class Domino:
         return product(range(y_max), range(x_max))
 
     @property
+    def T(self):
+        return Domino(self.orientation.T, self.filter1, self.filter2)
+
+    @property
+    def reflect_vertically(self):
+        if self.orientation == Orientation.H:
+            return Domino(self.orientation, self.filter1.other, self.filter2.other)
+        else:
+            return Domino(self.orientation, self.filter2.other, self.filter1.other)
+
+    @property
     def value(self):
         return (
             ((self.orientation.value - 1) << 2)
@@ -78,9 +97,7 @@ class Domino:
             return f"{self.filter1.char}\n{self.filter2.char}"
 
 
-ALL_DOMINOES = [
-    Domino(*p) for p in product(Orientation, Filter, Filter)
-]
+ALL_DOMINOES = [Domino(*p) for p in product(Orientation, Filter, Filter)]
 
 
 class Puzzle:
@@ -110,9 +127,17 @@ class Puzzle:
             n=data["n"],
             lights=np.array(data["lights"], dtype=np.uint8),
             dominoes=[ALL_DOMINOES[d] for d in data["dominoes"]],
-            initial_placed_dominoes=[PlacedDomino.from_json_dict(d) for d in data["initial_placed_dominoes"]],
-            solution=Board(data["n"], np.array(data["solution"]["values"], dtype=np.int8), 
-                           set(PlacedDomino.from_json_dict(d) for d in data["solution"]["placed_dominoes"]))
+            initial_placed_dominoes=[
+                PlacedDomino.from_json_dict(d) for d in data["initial_placed_dominoes"]
+            ],
+            solution=Board(
+                data["n"],
+                np.array(data["solution"]["values"], dtype=np.int8),
+                set(
+                    PlacedDomino.from_json_dict(d)
+                    for d in data["solution"]["placed_dominoes"]
+                ),
+            ),
         )
 
     def to_json_dict(self):
@@ -120,13 +145,19 @@ class Puzzle:
             "n": self.n,
             "lights": self.lights.tolist(),
             "dominoes": [d.value for d in self.dominoes],
-            "initial_placed_dominoes": [{"domino": pd.domino.value, "i": pd.x, "j": pd.y} for pd in self.initial_placed_dominoes],
+            "initial_placed_dominoes": [
+                {"domino": pd.domino.value, "i": pd.x, "j": pd.y}
+                for pd in self.initial_placed_dominoes
+            ],
             "solution": {
                 "values": self.solution.values.tolist(),
-                "placed_dominoes": [{"domino": pd.domino.value, "i": pd.x, "j": pd.y} for pd in self.solution.placed_dominoes]
-            }
+                "placed_dominoes": [
+                    {"domino": pd.domino.value, "i": pd.x, "j": pd.y}
+                    for pd in self.solution.placed_dominoes
+                ],
+            },
         }
-    
+
     @property
     def lights_int(self):
         return encode_lights(self.lights)
@@ -175,6 +206,10 @@ class PlacedDomino:
     y: int  # down
 
     @property
+    def T(self):
+        return PlacedDomino(self.domino.T, self.y, self.x)
+
+    @property
     def np_index(self):
         x, y = self.x, self.y
         if self.domino.orientation == Orientation.H:
@@ -185,7 +220,8 @@ class PlacedDomino:
 
     @classmethod
     def from_json_dict(cls, data):
-        return PlacedDomino(ALL_DOMINOES[data["domino"]],data["i"], data["j"])
+        return PlacedDomino(ALL_DOMINOES[data["domino"]], data["i"], data["j"])
+
 
 class Board:
     """A Polarize board consists of a set of placed dominoes."""
@@ -201,6 +237,13 @@ class Board:
         for i, pd in enumerate(self.placed_dominoes):
             c[pd.np_index] = i + 1
         return c
+
+    @property
+    def orientations(self):
+        orient = np.zeros((self.n, self.n), dtype=np.int8)
+        for pd in self.placed_dominoes:
+            orient[pd.np_index] = pd.domino.orientation.value
+        return orient
 
     def can_add(self, placed_domino):
         try:
@@ -264,6 +307,64 @@ class Board:
         paths = np.bitwise_count(paths)
         return paths
 
+    def rot90(self):
+        """Rotate the board through 90 degrees"""
+
+        # it's easier to express as a compund operation than
+        # to figure out how to rotate placed_dominoes
+        return self.transpose().reflect_vertically()
+
+    def reflect_vertically(self):
+        """Reflect the board vertically"""
+
+        def reflect_val(val):
+            if val == Filter.POS_45.value:
+                return Filter.NEG_45.value
+            elif val == Filter.NEG_45.value:
+                return Filter.POS_45.value
+            else:
+                return val
+
+        def reflect_pd(pd):
+            d = pd.domino
+            if d.orientation == Orientation.H:
+                return PlacedDomino(d.reflect_vertically, pd.x, self.n - 1 - pd.y)
+            else:
+                return PlacedDomino(d.reflect_vertically, pd.x, self.n - 2 - pd.y)
+
+        n = self.n  # size doesn't change
+        values = np.flip(self.values, axis=0)
+        values = np.vectorize(reflect_val)(values)
+        placed_dominoes = set(reflect_pd(pd) for pd in self.placed_dominoes)
+        return Board(n, values=values, placed_dominoes=placed_dominoes)
+
+    def transpose(self):
+        """Reflect the board in y=x"""
+
+        n = self.n  # size doesn't change
+        values = self.values.copy().T  # values don't change
+        placed_dominoes = set(pd.T for pd in self.placed_dominoes)
+        return Board(n, values=values, placed_dominoes=placed_dominoes)
+
+    def transforms(self):
+        """Return all the transforms of this board."""
+        board = self
+        yield board
+        board = board.rot90()
+        yield board
+        board = board.rot90()
+        yield board
+        board = board.rot90()
+        yield board
+        board = self.transpose()
+        yield board
+        board = board.rot90()
+        yield board
+        board = board.rot90()
+        yield board
+        board = board.rot90()
+        yield board
+
     def to_puzzle(self):
         dominoes = [pd.domino for pd in self.placed_dominoes]
 
@@ -271,7 +372,18 @@ class Board:
         from polarize.generate import layout
 
         initial_board = layout(self.n, dominoes)
-        return Puzzle(self.n, self.lights, dominoes, initial_board.placed_dominoes, self)
+        return Puzzle(
+            self.n, self.lights, dominoes, initial_board.placed_dominoes, self
+        )
+
+    def __eq__(self, other):
+        if isinstance(other, Board):
+            return (
+                self.n == other.n
+                and np.array_equal(self.values, other.values)
+                and self.placed_dominoes == other.placed_dominoes
+            )
+        return False
 
     def __str__(self):
         return str(self.values)

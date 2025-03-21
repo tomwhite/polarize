@@ -6,10 +6,12 @@ import numpy as np
 
 from polarize.model import ALL_DOMINOES, Board, Orientation, PlacedDomino
 
+
 def _coord_lt(n, coord1, coord2):
     y1, x1 = coord1
     y2, x2 = coord2
     return x1 + n * y1 < x2 + n * y2
+
 
 def _coords_increasing(n, coords):
     for i in range(len(coords) - 1):
@@ -17,7 +19,9 @@ def _coords_increasing(n, coords):
             return False
     return True
 
-def all_boards(n, dominoes):
+
+def all_boards_with_dominoes(n, dominoes):
+    """Return all boards containing dominoes in every permutation."""
     for domino_perm in set(permutations(domino for domino in dominoes)):
         for coords in product(*(domino.places() for domino in domino_perm)):
             # skip if coords are not strictly increasing (in pos)
@@ -78,7 +82,7 @@ def generate(n, n_pieces=None):
         dominoes = random.choices(ALL_DOMINOES, k=n_pieces)
 
         # find all the boards and lights for these dominoes
-        boards = list(all_boards(n, dominoes))
+        boards = list(all_boards_with_dominoes(n, dominoes))
         lights = np.asarray([board.lights_int for board in boards])
 
         # find unique lights
@@ -101,6 +105,5 @@ def generate(n, n_pieces=None):
         # check it has a unique solution
         if has_unique_solution(puzzle, fewer_pieces_allowed=True):
             break
-
 
     return puzzle, board

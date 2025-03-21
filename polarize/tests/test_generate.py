@@ -1,7 +1,7 @@
 import numpy as np
 
-from polarize.generate import all_boards, generate, layout
-from polarize.model import ALL_DOMINOES, Orientation
+from polarize.generate import all_boards_with_dominoes, generate, layout
+from polarize.model import ALL_DOMINOES
 from polarize.solve import solve
 
 
@@ -12,12 +12,12 @@ def test_all_boards():
 
     dominoes = [ALL_DOMINOES[0], ALL_DOMINOES[3]]
 
-    for board in all_boards(n=4, dominoes=dominoes):
+    for board in all_boards_with_dominoes(n=4, dominoes=dominoes):
         # print(board)
         console.print(board)
         print(board.lights_int)
 
-    boards = list(all_boards(n=4, dominoes=dominoes))
+    boards = list(all_boards_with_dominoes(n=4, dominoes=dominoes))
     lights = np.asarray([board.lights_int for board in boards])
 
     print("Total boards:", len(boards))
@@ -48,6 +48,7 @@ def test_all_boards():
         console.print(board)
         print(f"{board.lights_int}, {board.lights_int:08b}")
 
+
 def test_layout():
     dominoes = [ALL_DOMINOES[2], ALL_DOMINOES[7], ALL_DOMINOES[1]]
     board = layout(4, dominoes)
@@ -59,4 +60,3 @@ def test_generate():
     solutions = solve(puzzle)
     assert len(solutions) == 1
     assert solutions[0].placed_dominoes == solution.placed_dominoes
-

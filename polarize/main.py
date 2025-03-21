@@ -15,6 +15,7 @@ from polarize.storage import load_puzzle, save_puzzle
 def cli():
     pass
 
+
 @cli.command()
 @click.argument("filename", required=False)
 @click.option("--pieces", default=3)
@@ -23,6 +24,7 @@ def generate(filename, pieces):
     puzzle, _ = generate_puzzle(4, pieces)
     pprint(puzzle_features(puzzle))
     save_puzzle(puzzle, filename)
+
 
 @cli.command()
 @click.argument("filename", required=False)

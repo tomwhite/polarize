@@ -2,6 +2,7 @@ import numpy as np
 
 from polarize.model import Board, PlacedDomino
 
+
 def puzzle_features(puzzle):
     """
     Compute various puzzle features, which can be used to characterize its difficulty.
@@ -9,7 +10,9 @@ def puzzle_features(puzzle):
     num_dominoes = len(puzzle.dominoes)
     num_distinct_dominoes = len(set(puzzle.dominoes))
     num_yellow_spots = np.count_nonzero(np.asarray(puzzle.lights) == 0)
-    total_num_valid_domino_places = sum(num_valid_domino_places(puzzle, domino) for domino in puzzle.dominoes)
+    total_num_valid_domino_places = sum(
+        num_valid_domino_places(puzzle, domino) for domino in puzzle.dominoes
+    )
 
     return dict(
         num_dominoes=num_dominoes,

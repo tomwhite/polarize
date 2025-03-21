@@ -1,8 +1,25 @@
 import numpy as np
 from numpy.testing import assert_array_equal
+import pytest
 from rich.console import Console
 
-from polarize.model import Board, Filter, Orientation, PlacedDomino, ALL_DOMINOES
+from polarize.model import (
+    Board,
+    Filter,
+    Orientation,
+    PlacedDomino,
+    Puzzle,
+    ALL_DOMINOES,
+)
+
+
+@pytest.fixture
+def board():
+    # set on 21 Mar 2025
+    puzzle = Puzzle.from_json_str(
+        """{"n": 4, "lights": [2, 2, 1, 2, 2, 2, 0, 1], "dominoes": [7, 1, 0, 4], "initial_placed_dominoes": [{"domino": 7, "i": 0, "j": 0}, {"domino": 4, "i": 1, "j": 0}, {"domino": 0, "i": 2, "j": 1}, {"domino": 1, "i": 2, "j": 0}], "solution": {"values": [[2, 0, 0, 1], [2, 0, 0, 1], [1, 1, 0, 0], [1, 2, 0, 0]], "placed_dominoes": [{"domino": 7, "i": 0, "j": 0}, {"domino": 1, "i": 0, "j": 3}, {"domino": 0, "i": 0, "j": 2}, {"domino": 4, "i": 3, "j": 0}]}}"""
+    )
+    return puzzle.solution
 
 
 def test_filter():
@@ -57,6 +74,41 @@ def test_add_domino():
     assert not board.can_remove(d1)
     assert board.can_add(d2)
     assert not board.can_remove(d2)
+
+
+def test_reflect_vertically(board):
+    boardTransformed = board.reflect_vertically()
+
+    # constructed using trial and error (and `console.print(boardTransformed)`)
+    boardTransformed_expected = Board()
+    boardTransformed_expected.add_domino(PlacedDomino(ALL_DOMINOES[2], 0, 0))
+    boardTransformed_expected.add_domino(PlacedDomino(ALL_DOMINOES[3], 0, 1))
+    boardTransformed_expected.add_domino(PlacedDomino(ALL_DOMINOES[4], 0, 2))
+    boardTransformed_expected.add_domino(PlacedDomino(ALL_DOMINOES[7], 3, 2))
+
+    assert boardTransformed == boardTransformed_expected
+
+
+def test_transpose(board):
+    boardT = board.transpose()
+
+    # constructed using trial and error (and `console.print(boardT)`)
+    boardT_expected = Board()
+    boardT_expected.add_domino(PlacedDomino(ALL_DOMINOES[3], 0, 0))
+    boardT_expected.add_domino(PlacedDomino(ALL_DOMINOES[4], 2, 0))
+    boardT_expected.add_domino(PlacedDomino(ALL_DOMINOES[0], 0, 3))
+    boardT_expected.add_domino(PlacedDomino(ALL_DOMINOES[5], 3, 0))
+
+    assert boardT == boardT_expected
+
+
+def test_transforms(board):
+    for i, boardTransformed in enumerate(board.transforms()):
+        if i == 0:
+            assert board == boardTransformed
+        else:
+            assert not np.array_equal(board.values, boardTransformed.values)
+            assert board.placed_dominoes != boardTransformed.placed_dominoes
 
 
 def test_board_to_puzzle():

@@ -17,7 +17,11 @@ def test_puzzles_have_unique_solution(request):
             filename = Path(full_puzzle_file).name
             if filename < start_puzzle or filename > end_puzzle:
                 continue
-            if filename in ("puzzle-2025-01-17.json", "puzzle-2025-01-18.json", "puzzle-2025-01-19.json"):
+            if filename in (
+                "puzzle-2025-01-17.json",
+                "puzzle-2025-01-18.json",
+                "puzzle-2025-01-19.json",
+            ):
                 continue
             puzzle = load_puzzle(full_puzzle_file)
             assert has_unique_solution(puzzle, fewer_pieces_allowed=True)

@@ -1,6 +1,7 @@
 from polarize.model import Puzzle
 from polarize.solve import has_unique_solution, solve
 
+
 def test_solve_unique():
     # set on 18 Jan 2025
     puzzle = Puzzle.from_json_str(
@@ -11,6 +12,7 @@ def test_solve_unique():
     # assert has_unique_solution(puzzle, fewer_pieces_allowed=True)
     for solution in solve(puzzle, fewer_pieces_allowed=True):
         print(solution)
+
 
 def test_solve_not_unique():
     # set on 19 Jan 2025
