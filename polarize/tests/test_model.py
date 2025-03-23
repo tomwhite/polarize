@@ -10,6 +10,7 @@ from polarize.model import (
     PlacedDomino,
     Puzzle,
     ALL_DOMINOES,
+    decode_lights,
 )
 
 
@@ -129,6 +130,7 @@ def test_board_to_puzzle():
     )
     assert_array_equal(board.lights, [0, 0, 2, 1, 1, 1, 2, 0])
     assert board.lights_int == 0b0000_1001_0101_1000
+    assert_array_equal(decode_lights(board.lights_int), [0, 0, 2, 1, 1, 1, 2, 0])
 
     assert_array_equal(
         board.paths_horizontal,

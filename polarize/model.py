@@ -191,8 +191,8 @@ class Puzzle:
                 else:
                     text.append(" ")
             text.append("\n")
-        for i, domino in enumerate(self.dominoes):
-            text.append(str(domino), style=f"reverse color({i + 1})")
+        for domino in self.dominoes:
+            text.append(str(domino), style=f"reverse color({domino.value + 8})")
             text.append("\n")
         return text
 
@@ -234,8 +234,8 @@ class Board:
     @property
     def colours(self):
         c = np.zeros((self.n, self.n), dtype=np.int8)
-        for i, pd in enumerate(self.placed_dominoes):
-            c[pd.np_index] = i + 1
+        for pd in self.placed_dominoes:
+            c[pd.np_index] = pd.domino.value + 8
         return c
 
     @property
@@ -314,6 +314,11 @@ class Board:
         # to figure out how to rotate placed_dominoes
         return self.transpose().reflect_vertically()
 
+    def reflect_horizontally(self):
+        """Reflect the board horizontally"""
+
+        return self.rot90().transpose()
+
     def reflect_vertically(self):
         """Reflect the board vertically"""
 
@@ -389,16 +394,35 @@ class Board:
         return str(self.values)
 
     def __rich__(self):
+        n = self.n
         text = Text()
-        colours = self.colours
-        for y in range(self.n):
-            for x in range(self.n):
-                v = self.values[y, x]
-                c = colours[y, x]
-                if v == 0:
-                    text.append(".")
+        li = self.lights
+        for y in range(n + 2):
+            for x in range(n + 2):
+                if 1 <= x <= n and 1 <= y <= n:
+                    v = self.values[y - 1, x - 1]
+                    c = self.colours[y - 1, x - 1]
+                    if v == 0:
+                        text.append(".")
+                    else:
+                        text.append(Filter(v).char, style=f"reverse color({c})")
+                elif x in (0, n + 1) and 1 <= y <= n:
+                    if li[y - 1] == 0:
+                        text.append(BLOCK, style="#ffff00")
+                    elif li[y - 1] == 1:
+                        # ARYLIDE_YELLOW
+                        text.append(BLOCK, style="#E9D66B")
+                    else:
+                        text.append(BLOCK)
+                elif y in (0, n + 1) and 1 <= x <= n:
+                    if li[n + (x - 1)] == 0:
+                        text.append(BLOCK, style="#ffff00")
+                    elif li[n + (x - 1)] == 1:
+                        text.append(BLOCK, style="#E9D66B")
+                    else:
+                        text.append(BLOCK)
                 else:
-                    text.append(Filter(v).char, style=f"color({c})")
+                    text.append(" ")
             text.append("\n")
         return text
 
@@ -409,3 +433,12 @@ def encode_lights(lights):
         ret = ret << 2
         ret = ret | int(b)
     return ret
+
+
+def decode_lights(val):
+    li = np.empty(8, dtype=np.uint8)
+    shift = 7 * 2
+    for i in range(8):
+        li[i] = val >> shift & 0b11
+        shift -= 2
+    return li

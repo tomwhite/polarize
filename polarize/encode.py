@@ -2,6 +2,7 @@ import itertools
 
 import numba as nb
 import numpy as np
+import pandas as pd
 
 from polarize.model import (
     ALL_DOMINOES,
@@ -10,6 +11,8 @@ from polarize.model import (
     Filter,
     Orientation,
     PlacedDomino,
+    Puzzle,
+    decode_lights,
 )
 from polarize.util import cproduct_idx
 
@@ -77,6 +80,12 @@ def decode_board(val):
                 placed_dominoes.add(pd)
 
     return Board(values=filters, placed_dominoes=placed_dominoes)
+
+
+def decode_puzzle(lights_val, dominoes_val):
+    lights = decode_lights(lights_val)
+    dominoes = [ALL_DOMINOES[d] for d in decode_dominoes(dominoes_val)]
+    return Puzzle(4, lights, dominoes, initial_placed_dominoes=None)
 
 
 @nb.njit(nb.uint64(nb.uint64), cache=True)
@@ -291,8 +300,16 @@ def canonicalize_board(val):
     )
 
 
+@nb.njit(nb.uint64[:](nb.uint64[:]), cache=True)
+def canonicalize_boards(boards):
+    canonicalized = np.empty(boards.shape[0], dtype=np.uint64)
+    for i in range(boards.shape[0]):
+        canonicalized[i] = canonicalize_board(boards[i])
+    return canonicalized
+
+
 @nb.njit(nb.uint32(nb.uint32), cache=True)
-def encode_lights(filters):
+def encode_lights_from_filters(filters):
     """Return an int encoding the lights, determined by the dominoes placed on this board."""
 
     li = 0
@@ -320,8 +337,44 @@ def encode_lights(filters):
     return li
 
 
+@nb.njit(nb.uint32(nb.uint32), cache=True)
+def reflect_lights_horizontally(val):
+    """Reflect the encoded lights horizontally"""
+
+    h = val >> 8 & 0b11111111
+    v1 = val & 0b_11000000
+    v2 = val & 0b_00110000
+    v3 = val & 0b_00001100
+    v4 = val & 0b_00000011
+
+    return (h << 8) | (v1 >> 6) | (v2 >> 2) | (v3 << 2) | (v4 << 6)
+
+
+@nb.njit(nb.uint32(nb.uint32), cache=True)
+def reflect_lights_vertically(val):
+    """Reflect the encoded lights vertically"""
+
+    h1 = val >> 8 & 0b_11000000
+    h2 = val >> 8 & 0b_00110000
+    h3 = val >> 8 & 0b_00001100
+    h4 = val >> 8 & 0b_00000011
+    v = val & 0b11111111
+
+    return (h1 << 2) | (h2 << 6) | (h3 << 10) | (h4 << 14) | v
+
+
+@nb.njit(nb.uint32(nb.uint32), cache=True)
+def transpose_lights(val):
+    """Reflect the encoded lights in y=x"""
+
+    h = val >> 8 & 0b11111111
+    v = val & 0b11111111
+
+    return (v << 8) | h
+
+
 @nb.njit(nb.uint32(nb.int8[:]), cache=True)
-def encode_dominoes_from_ints(dominoes):
+def encode_dominoes(dominoes):
     """Encode a multiset of dominoes from an array of domino indexes as an unsigned int by packing bits.
     Each distinct domino is represented by a 4-bit count.
     """
@@ -329,6 +382,60 @@ def encode_dominoes_from_ints(dominoes):
     for i in range(8):  # total number of dominoes
         val = val << 4 | np.sum(dominoes == i)
     return val
+
+
+def decode_dominoes(val):
+    """Decode an unsigned 32-bit int representing a multiset of dominoes by unpacking bits."""
+    dominoes = []
+    for i in range(8):
+        count = val & 0b1111
+        val = val >> 4
+        for _ in range(count):
+            dominoes.append(7 - i)
+    dominoes.reverse()
+    return np.array(dominoes, dtype=np.int8)
+
+
+@nb.njit(nb.uint32(nb.uint32), cache=True)
+def reflect_dominoes_horizontally(val):
+    """Reflect the encoded dominoes horizontally"""
+    r0 = (val & 0x0000000F) >> 0
+    r1 = (val & 0x000000F0) >> 4
+    r2 = (val & 0x00000F00) >> 8
+    r3 = (val & 0x0000F000) >> 12
+    r4 = (val & 0x000F0000) >> 16
+    r5 = (val & 0x00F00000) >> 20
+    r6 = (val & 0x0F000000) >> 24
+    r7 = (val & 0xF0000000) >> 28
+    return r3 | (r2 << 4) | (r1 << 8) | (r0 << 12) | (r7 << 16) | (r5 << 20) | (r6 << 24) | (r4 << 28)
+
+
+@nb.njit(nb.uint32(nb.uint32), cache=True)
+def reflect_dominoes_vertically(val):
+    """Reflect the encoded dominoes vertically"""
+    r0 = (val & 0x0000000F) >> 0
+    r1 = (val & 0x000000F0) >> 4
+    r2 = (val & 0x00000F00) >> 8
+    r3 = (val & 0x0000F000) >> 12
+    r4 = (val & 0x000F0000) >> 16
+    r5 = (val & 0x00F00000) >> 20
+    r6 = (val & 0x0F000000) >> 24
+    r7 = (val & 0xF0000000) >> 28
+    return r3 | (r1 << 4) | (r2 << 8) | (r0 << 12) | (r7 << 16) | (r6 << 20) | (r5 << 24) | (r4 << 28)
+
+
+@nb.njit(nb.uint32(nb.uint32), cache=True)
+def transpose_dominoes(val):
+    """Reflect the encoded dominoes in y=x"""
+    r0 = (val & 0x0000000F) >> 0
+    r1 = (val & 0x000000F0) >> 4
+    r2 = (val & 0x00000F00) >> 8
+    r3 = (val & 0x0000F000) >> 12
+    r4 = (val & 0x000F0000) >> 16
+    r5 = (val & 0x00F00000) >> 20
+    r6 = (val & 0x0F000000) >> 24
+    r7 = (val & 0xF0000000) >> 28
+    return r4 | (r5 << 4) | (r6 << 8) | (r7 << 12) | (r0 << 16) | (r1 << 20) | (r2 << 24) | (r3 << 28)
 
 
 def all_boards(num_pieces):
@@ -400,8 +507,118 @@ def _all_boards(selections):
             if valid_board:
                 val = (filters << 32) | orientations
                 boards[board_idx] = val
-                lights[board_idx] = encode_lights(filters)
-                dominoes[board_idx] = encode_dominoes_from_ints(selections[p])
+                lights[board_idx] = encode_lights_from_filters(filters)
+                dominoes[board_idx] = encode_dominoes(selections[p])
                 board_idx += 1
 
     return boards[:board_idx], lights[:board_idx], dominoes[:board_idx]
+
+
+def canonical_boards(num_pieces):
+    """Return an array containing all the canonical boards - and their corresponding lights and dominoes - containing `num_pieces`."""
+
+    boards, lights, dominoes = all_boards(num_pieces)
+    canonicalized_boards, indices, _, _ = np.unique_all(canonicalize_boards(boards))
+    return canonicalized_boards, lights[indices], dominoes[indices]
+
+
+def all_puzzles_with_unique_solution(num_pieces):
+    """Compute all the puzzles containing `num_pieces` with a unique solution.
+
+    Note that symmetries are _not_ taken into account, so puzzles that can be transformed into one another
+    will all be returned.
+    """
+
+    board_vals, lights_vals, dominoes_vals = all_boards(num_pieces=num_pieces)
+
+    df = pd.DataFrame({"boards": board_vals, "lights": lights_vals, "dominoes": dominoes_vals})
+
+    # remove any duplicates ('keep=False') since these are puzzles for which the same lights and dominoes
+    # have different board values so they do not have unique solutions
+    df_uniq_solns = df.drop_duplicates(["lights", "dominoes"], keep=False)
+
+    board_vals = df_uniq_solns["boards"].to_numpy().astype(np.uint64)
+    lights_vals = df_uniq_solns["lights"].to_numpy().astype(np.uint32)
+    dominoes_vals = df_uniq_solns["dominoes"].to_numpy().astype(np.uint32)
+
+    return board_vals, lights_vals, dominoes_vals
+
+
+@nb.njit(nb.types.Tuple((nb.uint32, nb.uint32))(nb.uint32, nb.uint32), cache=True)
+def canonicalize_puzzle(lights, dominoes):
+
+    horizontal_reflection = reflect_lights_horizontally(lights)
+    vertical_reflection = reflect_lights_vertically(lights)
+    transposition = transpose_lights(lights)
+
+    rotated_90 = reflect_lights_horizontally(transposition)
+    rotated_180 = reflect_lights_vertically(horizontal_reflection)
+    rotated_270 = reflect_lights_vertically(transposition)
+
+    anti_transposition = reflect_lights_vertically(rotated_90)
+
+    transformed_lights = np.array(
+        [
+            lights,
+            rotated_270,
+            rotated_180,
+            rotated_90,
+            transposition,
+            vertical_reflection,
+            anti_transposition,
+            horizontal_reflection,
+        ],
+        dtype=np.uint64,
+    )
+    canonical_lights = min(transformed_lights)
+
+    horizontal_reflection = reflect_dominoes_horizontally(dominoes)
+    vertical_reflection = reflect_dominoes_vertically(dominoes)
+    transposition = transpose_dominoes(dominoes)
+
+    rotated_90 = reflect_dominoes_horizontally(transposition)
+    rotated_180 = reflect_dominoes_vertically(horizontal_reflection)
+    rotated_270 = reflect_dominoes_vertically(transposition)
+
+    anti_transposition = reflect_dominoes_vertically(rotated_90)
+
+    transformed_pieces = np.array(
+        [
+            dominoes,
+            rotated_270,
+            rotated_180,
+            rotated_90,
+            transposition,
+            vertical_reflection,
+            anti_transposition,
+            horizontal_reflection,
+        ],
+        dtype=np.uint32,
+    )
+
+    # to restrict transformed lights to all the canonical (minimum) lights in case there are ties
+    canonical_pieces = min(transformed_pieces[transformed_lights == canonical_lights])
+
+    return canonical_lights, canonical_pieces
+
+
+def canonical_puzzles_with_unique_solution(num_pieces):
+    """Compute all canonical puzzles with a unique solution containing `num_pieces`, taking symmetries into account."""
+
+    _, single_solution_lights, single_solution_dominoes = all_puzzles_with_unique_solution(num_pieces)
+    n_puzzles = len(single_solution_lights)
+
+    canonical_lights = np.empty(n_puzzles, dtype=np.uint32)
+    canonical_dominoes = np.empty(n_puzzles, dtype=np.uint32)
+    for i, (lights, dominoes) in enumerate(
+        zip(single_solution_lights, single_solution_dominoes)
+    ):
+        canonical_lights[i], canonical_dominoes[i] = canonicalize_puzzle(lights, dominoes)
+
+    # remove duplicate canonical puzzles
+    canonical_puzzles = np.stack((canonical_lights, canonical_dominoes), axis=1)
+    canonical_puzzles = np.unique(canonical_puzzles, axis=0)
+    canonical_lights = canonical_puzzles[:, 0]
+    canonical_dominoes = canonical_puzzles[:, 1]
+
+    return canonical_lights, canonical_dominoes
