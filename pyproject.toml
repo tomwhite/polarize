@@ -13,6 +13,7 @@ authors = [
 dependencies = [
     "arcade",
     "click",
+    "hypothesis",
     "numba",
     "numpy",
     "pytest",

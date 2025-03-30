@@ -1,4 +1,5 @@
 arcade
+hypothesis
 numba
 numpy
 pytest

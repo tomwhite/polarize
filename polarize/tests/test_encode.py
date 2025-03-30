@@ -2,6 +2,7 @@ from itertools import combinations_with_replacement
 
 import numpy as np
 import pytest
+from hypothesis import given, strategies as st
 from numpy.testing import assert_array_equal
 
 from polarize.encode import (
@@ -31,6 +32,7 @@ from polarize.generate import all_boards_with_dominoes
 from polarize.model import ALL_DOMINOES, Board, Puzzle, PlacedDomino
 from polarize.solve import has_unique_solution
 
+from polarize.tests.strategies import boards
 
 @pytest.fixture
 def board():
@@ -64,35 +66,44 @@ def test_encode_decode_board(board):
     assert decoded_board == board
 
 
-def test_reflect_horizontally(board):
-    val = encode_board(board)
+@given(boards())
+def test_reflect_horizontally(b):
+    board = b
+    val = encode_board(b)
     transformed_val = reflect_horizontally(val)
     transformed_board = decode_board(transformed_val)
     assert transformed_board == board.reflect_horizontally()
 
 
-def test_reflect_vertically(board):
+@given(boards())
+def test_reflect_vertically(b):
+    board = b
     val = encode_board(board)
     transformed_val = reflect_vertically(val)
     transformed_board = decode_board(transformed_val)
     assert transformed_board == board.reflect_vertically()
 
 
-def test_transpose(board):
+@given(boards())
+def test_transpose(b):
+    board = b
     val = encode_board(board)
     transformed_val = transpose(val)
     transformed_board = decode_board(transformed_val)
     assert transformed_board == board.transpose()
 
 
-def test_transforms(board):
+@given(boards())
+def test_transforms(b):
+    board = b
     val = encode_board(board)
     for tb, tv in zip(board.transforms(), transforms(val)):
         assert decode_board(tv) == tb
 
 
-def test_canonicalize_board(board):
-    val = encode_board(board)
+@given(boards())
+def test_canonicalize_board(b):
+    val = encode_board(b)
     assert canonicalize_board(val) in transforms(val)
 
 
@@ -115,49 +126,53 @@ def test_all_boards():
         assert len(boards) == len(boards_check)
 
 
-def test_encode_lights_from_filters(board):
+@given(boards())
+def test_encode_lights_from_filters(b):
+    board = b
     board_val = encode_board(board)
     filters = board_val >> 32 & 0xFFFFFFFF
     assert encode_lights_from_filters(filters) == board.lights_int
 
 
-def test_reflect_lights_horizontally(board):
-    board_val = encode_board(board)
+@given(boards())
+def test_reflect_lights_horizontally(b):
+    board_val = encode_board(b)
     filters = board_val >> 32 & 0xFFFFFFFF
     val = encode_lights_from_filters(filters)
     assert reflect_lights_horizontally(val) == encode_lights_from_filters(reflect_horizontally(board_val) >> 32 & 0xFFFFFFFF)
 
-
-def test_reflect_lights_vertically(board):
-    board_val = encode_board(board)
+@given(boards())
+def test_reflect_lights_vertically(b):
+    board_val = encode_board(b)
     filters = board_val >> 32 & 0xFFFFFFFF
     val = encode_lights_from_filters(filters)
 
     assert reflect_lights_vertically(val) == encode_lights_from_filters(reflect_vertically(board_val) >> 32 & 0xFFFFFFFF)
 
 
-def test_transpose_lights(board):
-    board_val = encode_board(board)
+@given(boards())
+def test_transpose_lights(b):
+    board_val = encode_board(b)
     filters = board_val >> 32 & 0xFFFFFFFF
     val = encode_lights_from_filters(filters)
 
     assert transpose_lights(val) == encode_lights_from_filters(transpose(board_val) >> 32 & 0xFFFFFFFF)
 
 
-def test_encode_decode_dominoes(board):
+@given(boards())
+def test_encode_decode_dominoes(b):
+    board = b
     dominoes = np.array(
         [pd.domino.value for pd in board.placed_dominoes], dtype=np.int8
     )
-    assert set(dominoes) == set([0, 1, 4, 7])
-
     val = encode_dominoes(dominoes)
-    assert val == 0b_00010001_00000000_00010000_00000001
-
     dominoes_decoded = decode_dominoes(val)
     assert_array_equal(set(dominoes_decoded), set(dominoes))
 
 
-def test_reflect_dominoes_horizontally(board):
+@given(boards())
+def test_reflect_dominoes_horizontally(b):
+    board = b
     dominoes = np.array(
         [pd.domino.value for pd in board.placed_dominoes], dtype=np.int8
     )
@@ -169,7 +184,9 @@ def test_reflect_dominoes_horizontally(board):
     assert reflect_dominoes_horizontally(val) == encode_dominoes(dominoes)
 
 
-def test_reflect_dominoes_vertically(board):
+@given(boards())
+def test_reflect_dominoes_vertically(b):
+    board = b
     dominoes = np.array(
         [pd.domino.value for pd in board.placed_dominoes], dtype=np.int8
     )
@@ -181,7 +198,9 @@ def test_reflect_dominoes_vertically(board):
     assert reflect_dominoes_vertically(val) == encode_dominoes(dominoes)
 
 
-def test_transpose_dominoes(board):
+@given(boards())
+def test_transpose_dominoes(b):
+    board = b
     dominoes = np.array(
         [pd.domino.value for pd in board.placed_dominoes], dtype=np.int8
     )
