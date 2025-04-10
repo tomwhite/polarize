@@ -2,7 +2,7 @@ import datetime
 from pathlib import Path
 
 from polarize.solve import has_unique_solution
-from polarize.storage import load_puzzle
+from polarize.storage import load_puzzle, first_missing_puzzle_path
 
 
 def test_puzzles_have_unique_solution(request):
@@ -25,3 +25,18 @@ def test_puzzles_have_unique_solution(request):
                 continue
             puzzle = load_puzzle(full_puzzle_file)
             assert has_unique_solution(puzzle, fewer_pieces_allowed=True)
+
+
+def test_puzzles_in_future(request):
+    day = datetime.datetime.today()
+    num_days = 0
+    while True:
+        date = day.strftime("%Y-%m-%d")
+        full_puzzle_file = request.config.rootdir / "puzzles" / f"puzzle-{date}.json"
+        if not full_puzzle_file.exists():
+            break
+        assert load_puzzle(full_puzzle_file) is not None
+        num_days += 1
+        day = day + datetime.timedelta(days=1)
+    assert num_days >= 3, f"Missing {full_puzzle_file}"
+    assert first_missing_puzzle_path().name == Path(full_puzzle_file).name
