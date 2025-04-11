@@ -30,7 +30,7 @@ from polarize.encode import (
 )
 from polarize.generate import all_boards_with_dominoes
 from polarize.model import ALL_DOMINOES, Board, Puzzle, PlacedDomino
-from polarize.solve import has_unique_solution
+from polarize.solve import has_unique_solution, quick_has_unique_solution
 
 from polarize.tests.strategies import boards
 

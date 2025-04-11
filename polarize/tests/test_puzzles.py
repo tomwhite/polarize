@@ -1,6 +1,10 @@
 import datetime
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+
+from polarize.encode import encode_dominoes
 from polarize.solve import has_unique_solution
 from polarize.storage import load_puzzle, first_missing_puzzle_path
 
@@ -25,6 +29,30 @@ def test_puzzles_have_unique_solution(request):
                 continue
             puzzle = load_puzzle(full_puzzle_file)
             assert has_unique_solution(puzzle, fewer_pieces_allowed=True)
+
+
+def test_puzzles_are_unique(request):
+    puzzles = {}
+    for full_puzzle_file in sorted((request.config.rootdir / "puzzles").listdir()):
+        if full_puzzle_file.isfile():
+            filename = Path(full_puzzle_file).name
+            if filename in ("puzzle-2025-03-28.json"):  # dup of puzzle-2025-03-21.json
+                continue
+            puzzle = load_puzzle(full_puzzle_file)
+            puzzles[filename] = puzzle
+
+    lights_vals = np.zeros(len(puzzles), dtype=np.uint32)
+    dominoes_vals = np.zeros(len(puzzles), dtype=np.uint32)
+    for i, puzzle in enumerate(puzzles.values()):
+        lights_vals[i] = puzzle.lights_int
+        dominoes_vals[i] = encode_dominoes(np.array([d.value for d in puzzle.dominoes], dtype=np.int8))
+
+    df = pd.DataFrame({"files": puzzles.keys(), "lights": lights_vals, "dominoes": dominoes_vals})
+    df["duplicated"] = df.duplicated(["lights", "dominoes"], keep=False)
+
+    duplicates = df[df["duplicated"] == True]
+
+    assert len(duplicates) == 0
 
 
 def test_puzzles_in_future(request):
