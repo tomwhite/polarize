@@ -7,7 +7,7 @@ from polarize.storage import load_puzzle, first_missing_puzzle_path
 
 def test_puzzles_have_unique_solution(request):
     today = datetime.datetime.today()
-    start_date = "2025-01-11"
+    start_date = (today - datetime.timedelta(days=2)).strftime("%Y-%m-%d")
     end_date = (today + datetime.timedelta(days=5)).strftime("%Y-%m-%d")
     start_puzzle = f"puzzle-{start_date}.json"
     end_puzzle = f"puzzle-{end_date}.json"
