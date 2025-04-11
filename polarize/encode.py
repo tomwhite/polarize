@@ -522,8 +522,8 @@ def canonical_boards(num_pieces):
     return canonicalized_boards, lights[indices], dominoes[indices]
 
 
-def all_puzzles_with_unique_solution(num_pieces):
-    """Compute all the puzzles containing `num_pieces` with a unique solution.
+def all_puzzles(num_pieces):
+    """Compute all the puzzles containing `num_pieces`.
 
     Note that symmetries are _not_ taken into account, so puzzles that can be transformed into one another
     will all be returned.
@@ -533,15 +533,23 @@ def all_puzzles_with_unique_solution(num_pieces):
 
     df = pd.DataFrame({"boards": board_vals, "lights": lights_vals, "dominoes": dominoes_vals})
 
-    # remove any duplicates ('keep=False') since these are puzzles for which the same lights and dominoes
+    # mark all duplicates ('keep=False') since these are puzzles for which the same lights and dominoes
     # have different board values so they do not have unique solutions
-    df_uniq_solns = df.drop_duplicates(["lights", "dominoes"], keep=False)
+    duplicated = df.duplicated(["lights", "dominoes"], keep=False).to_numpy()
 
-    board_vals = df_uniq_solns["boards"].to_numpy().astype(np.uint64)
-    lights_vals = df_uniq_solns["lights"].to_numpy().astype(np.uint32)
-    dominoes_vals = df_uniq_solns["dominoes"].to_numpy().astype(np.uint32)
+    return duplicated, board_vals, lights_vals, dominoes_vals
 
-    return board_vals, lights_vals, dominoes_vals
+
+def all_puzzles_with_unique_solution(num_pieces):
+    """Compute all the puzzles containing `num_pieces` with a unique solution.
+
+    Note that symmetries are _not_ taken into account, so puzzles that can be transformed into one another
+    will all be returned.
+    """
+
+    duplicated, board_vals, lights_vals, dominoes_vals = all_puzzles(num_pieces=num_pieces)
+    uniq = duplicated == False
+    return board_vals[uniq], lights_vals[uniq], dominoes_vals[uniq]
 
 
 @nb.njit(nb.types.Tuple((nb.uint32, nb.uint32))(nb.uint32, nb.uint32), cache=True)
