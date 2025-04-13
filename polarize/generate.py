@@ -107,3 +107,11 @@ def generate(n, n_pieces=None):
             break
 
     return puzzle, board
+
+
+def puzzle_generator(
+    n,
+    n_pieces=None,
+):
+    while True:
+        yield generate(n, n_pieces=n_pieces)

@@ -2,7 +2,7 @@ from itertools import combinations_with_replacement
 
 import numpy as np
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
 from numpy.testing import assert_array_equal
 
 from polarize.encode import (
@@ -30,9 +30,10 @@ from polarize.encode import (
 )
 from polarize.generate import all_boards_with_dominoes
 from polarize.model import ALL_DOMINOES, Board, Puzzle, PlacedDomino
-from polarize.solve import has_unique_solution, quick_has_unique_solution
+from polarize.solve import has_unique_solution
 
 from polarize.tests.strategies import boards
+
 
 @pytest.fixture
 def board():
@@ -139,7 +140,10 @@ def test_reflect_lights_horizontally(b):
     board_val = encode_board(b)
     filters = board_val >> 32 & 0xFFFFFFFF
     val = encode_lights_from_filters(filters)
-    assert reflect_lights_horizontally(val) == encode_lights_from_filters(reflect_horizontally(board_val) >> 32 & 0xFFFFFFFF)
+    assert reflect_lights_horizontally(val) == encode_lights_from_filters(
+        reflect_horizontally(board_val) >> 32 & 0xFFFFFFFF
+    )
+
 
 @given(boards())
 def test_reflect_lights_vertically(b):
@@ -147,7 +151,9 @@ def test_reflect_lights_vertically(b):
     filters = board_val >> 32 & 0xFFFFFFFF
     val = encode_lights_from_filters(filters)
 
-    assert reflect_lights_vertically(val) == encode_lights_from_filters(reflect_vertically(board_val) >> 32 & 0xFFFFFFFF)
+    assert reflect_lights_vertically(val) == encode_lights_from_filters(
+        reflect_vertically(board_val) >> 32 & 0xFFFFFFFF
+    )
 
 
 @given(boards())
@@ -156,7 +162,9 @@ def test_transpose_lights(b):
     filters = board_val >> 32 & 0xFFFFFFFF
     val = encode_lights_from_filters(filters)
 
-    assert transpose_lights(val) == encode_lights_from_filters(transpose(board_val) >> 32 & 0xFFFFFFFF)
+    assert transpose_lights(val) == encode_lights_from_filters(
+        transpose(board_val) >> 32 & 0xFFFFFFFF
+    )
 
 
 @given(boards())
@@ -179,7 +187,8 @@ def test_reflect_dominoes_horizontally(b):
     val = encode_dominoes(dominoes)
 
     dominoes = np.array(
-        [pd.domino.value for pd in board.reflect_horizontally().placed_dominoes], dtype=np.int8
+        [pd.domino.value for pd in board.reflect_horizontally().placed_dominoes],
+        dtype=np.int8,
     )
     assert reflect_dominoes_horizontally(val) == encode_dominoes(dominoes)
 
@@ -193,7 +202,8 @@ def test_reflect_dominoes_vertically(b):
     val = encode_dominoes(dominoes)
 
     dominoes = np.array(
-        [pd.domino.value for pd in board.reflect_vertically().placed_dominoes], dtype=np.int8
+        [pd.domino.value for pd in board.reflect_vertically().placed_dominoes],
+        dtype=np.int8,
     )
     assert reflect_dominoes_vertically(val) == encode_dominoes(dominoes)
 
@@ -248,7 +258,9 @@ def test_canonicalize_puzzle():
 
     # ... but the puzzles resulting from them are not
     # (in other words, the puzzle doesn't have a unique solution)
-    assert canonicalize_puzzle(lights1_val, dominoes1_val) == canonicalize_puzzle(lights2_val, dominoes2_val)
+    assert canonicalize_puzzle(lights1_val, dominoes1_val) == canonicalize_puzzle(
+        lights2_val, dominoes2_val
+    )
 
 
 def test_canonical_puzzles_with_unique_solution():

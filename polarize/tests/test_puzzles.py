@@ -45,9 +45,13 @@ def test_puzzles_are_unique(request):
     dominoes_vals = np.zeros(len(puzzles), dtype=np.uint32)
     for i, puzzle in enumerate(puzzles.values()):
         lights_vals[i] = puzzle.lights_int
-        dominoes_vals[i] = encode_dominoes(np.array([d.value for d in puzzle.dominoes], dtype=np.int8))
+        dominoes_vals[i] = encode_dominoes(
+            np.array([d.value for d in puzzle.dominoes], dtype=np.int8)
+        )
 
-    df = pd.DataFrame({"files": puzzles.keys(), "lights": lights_vals, "dominoes": dominoes_vals})
+    df = pd.DataFrame(
+        {"files": puzzles.keys(), "lights": lights_vals, "dominoes": dominoes_vals}
+    )
     df["duplicated"] = df.duplicated(["lights", "dominoes"], keep=False)
 
     duplicates = df[df["duplicated"] == True]

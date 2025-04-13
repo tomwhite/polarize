@@ -3,9 +3,11 @@ from hypothesis import strategies as st
 
 from polarize.encode import all_boards, decode_board
 
+
 @cache
 def _all_board_vals(num_pieces):
     return all_boards(num_pieces)[0]
+
 
 @st.composite
 def boards(draw, max_num_pieces=4):

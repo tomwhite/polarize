@@ -407,7 +407,16 @@ def reflect_dominoes_horizontally(val):
     r5 = (val & 0x00F00000) >> 20
     r6 = (val & 0x0F000000) >> 24
     r7 = (val & 0xF0000000) >> 28
-    return r3 | (r2 << 4) | (r1 << 8) | (r0 << 12) | (r7 << 16) | (r5 << 20) | (r6 << 24) | (r4 << 28)
+    return (
+        r3
+        | (r2 << 4)
+        | (r1 << 8)
+        | (r0 << 12)
+        | (r7 << 16)
+        | (r5 << 20)
+        | (r6 << 24)
+        | (r4 << 28)
+    )
 
 
 @nb.njit(nb.uint32(nb.uint32), cache=True)
@@ -421,7 +430,16 @@ def reflect_dominoes_vertically(val):
     r5 = (val & 0x00F00000) >> 20
     r6 = (val & 0x0F000000) >> 24
     r7 = (val & 0xF0000000) >> 28
-    return r3 | (r1 << 4) | (r2 << 8) | (r0 << 12) | (r7 << 16) | (r6 << 20) | (r5 << 24) | (r4 << 28)
+    return (
+        r3
+        | (r1 << 4)
+        | (r2 << 8)
+        | (r0 << 12)
+        | (r7 << 16)
+        | (r6 << 20)
+        | (r5 << 24)
+        | (r4 << 28)
+    )
 
 
 @nb.njit(nb.uint32(nb.uint32), cache=True)
@@ -435,7 +453,16 @@ def transpose_dominoes(val):
     r5 = (val & 0x00F00000) >> 20
     r6 = (val & 0x0F000000) >> 24
     r7 = (val & 0xF0000000) >> 28
-    return r4 | (r5 << 4) | (r6 << 8) | (r7 << 12) | (r0 << 16) | (r1 << 20) | (r2 << 24) | (r3 << 28)
+    return (
+        r4
+        | (r5 << 4)
+        | (r6 << 8)
+        | (r7 << 12)
+        | (r0 << 16)
+        | (r1 << 20)
+        | (r2 << 24)
+        | (r3 << 28)
+    )
 
 
 def all_boards(num_pieces):
@@ -531,7 +558,9 @@ def all_puzzles(num_pieces):
 
     board_vals, lights_vals, dominoes_vals = all_boards(num_pieces=num_pieces)
 
-    df = pd.DataFrame({"boards": board_vals, "lights": lights_vals, "dominoes": dominoes_vals})
+    df = pd.DataFrame(
+        {"boards": board_vals, "lights": lights_vals, "dominoes": dominoes_vals}
+    )
 
     # mark all duplicates ('keep=False') since these are puzzles for which the same lights and dominoes
     # have different board values so they do not have unique solutions
@@ -547,14 +576,15 @@ def all_puzzles_with_unique_solution(num_pieces):
     will all be returned.
     """
 
-    duplicated, board_vals, lights_vals, dominoes_vals = all_puzzles(num_pieces=num_pieces)
+    duplicated, board_vals, lights_vals, dominoes_vals = all_puzzles(
+        num_pieces=num_pieces
+    )
     uniq = duplicated == False
     return board_vals[uniq], lights_vals[uniq], dominoes_vals[uniq]
 
 
 @nb.njit(nb.types.Tuple((nb.uint32, nb.uint32))(nb.uint32, nb.uint32), cache=True)
 def canonicalize_puzzle(lights, dominoes):
-
     horizontal_reflection = reflect_lights_horizontally(lights)
     vertical_reflection = reflect_lights_vertically(lights)
     transposition = transpose_lights(lights)
@@ -613,7 +643,9 @@ def canonicalize_puzzle(lights, dominoes):
 def canonical_puzzles_with_unique_solution(num_pieces):
     """Compute all canonical puzzles with a unique solution containing `num_pieces`, taking symmetries into account."""
 
-    _, single_solution_lights, single_solution_dominoes = all_puzzles_with_unique_solution(num_pieces)
+    _, single_solution_lights, single_solution_dominoes = (
+        all_puzzles_with_unique_solution(num_pieces)
+    )
     n_puzzles = len(single_solution_lights)
 
     canonical_lights = np.empty(n_puzzles, dtype=np.uint32)
@@ -621,7 +653,9 @@ def canonical_puzzles_with_unique_solution(num_pieces):
     for i, (lights, dominoes) in enumerate(
         zip(single_solution_lights, single_solution_dominoes)
     ):
-        canonical_lights[i], canonical_dominoes[i] = canonicalize_puzzle(lights, dominoes)
+        canonical_lights[i], canonical_dominoes[i] = canonicalize_puzzle(
+            lights, dominoes
+        )
 
     # remove duplicate canonical puzzles
     canonical_puzzles = np.stack((canonical_lights, canonical_dominoes), axis=1)

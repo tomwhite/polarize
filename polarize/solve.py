@@ -36,8 +36,10 @@ def has_unique_solution(puzzle, *, fewer_pieces_allowed=False):
     solutions = solve(puzzle, fewer_pieces_allowed=fewer_pieces_allowed)
     return len(solutions) == 1
 
+
 # The "quick" solve functions use the code from encode.py which pre-compute all boards
 # of a certain size
+
 
 @cache
 def _get_all_puzzles(num_pieces, fewer_pieces_allowed=False):
@@ -60,6 +62,7 @@ def _get_all_puzzles(num_pieces, fewer_pieces_allowed=False):
 
     return None, all_boards, all_lights, all_dominoes
 
+
 def _boards_and_lights_for_dominoes(puzzle, *, fewer_pieces_allowed=False):
     num_pieces = len(puzzle.dominoes)
 
@@ -69,7 +72,9 @@ def _boards_and_lights_for_dominoes(puzzle, *, fewer_pieces_allowed=False):
 
     if not fewer_pieces_allowed:
         # simple case: use exactly num_pieces
-        dominoes_val = encode_dominoes(np.array([d.value for d in puzzle.dominoes], dtype=np.int8))
+        dominoes_val = encode_dominoes(
+            np.array([d.value for d in puzzle.dominoes], dtype=np.int8)
+        )
         dominoes_index = all_dominoes == dominoes_val
 
     else:
@@ -80,7 +85,7 @@ def _boards_and_lights_for_dominoes(puzzle, *, fewer_pieces_allowed=False):
             dominoes_ints_subset = np.array(list(dominoes_subset), dtype=np.int8)
             dominoes_vals[i] = encode_dominoes(dominoes_ints_subset)
         dominoes_index = np.isin(all_dominoes, dominoes_vals)
-    
+
     # restrict to boards and lights with desired dominoes
     boards_with_pieces = all_boards[dominoes_index]
     lights_with_dominoes = all_lights[dominoes_index]
@@ -97,8 +102,9 @@ def _quick_solve(puzzle, *, fewer_pieces_allowed=False):
     # restrict to lights in puzzle
     lights_val = puzzle.lights_int
     matching_boards = boards_with_dominoes[lights_with_dominoes == lights_val]
-    
+
     return matching_boards
+
 
 def quick_solve(puzzle, *, fewer_pieces_allowed=False):
     matching_boards = _quick_solve(puzzle, fewer_pieces_allowed=fewer_pieces_allowed)
