@@ -2,6 +2,7 @@ arcade
 hypothesis
 numba
 numpy
+pandas
 pytest
 pytest-cov
 rich
