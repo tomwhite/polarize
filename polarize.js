@@ -162,6 +162,11 @@ class Board {
     this.values[j2][i2] = 0;
   }
 
+  reset() {
+    this.values = zeros2D(this.n, this.n);
+    this.placedDominoes = [];
+  }
+
   lights() {
     const n = this.n;
     const li = new Array(n * 2).fill(0);
@@ -451,6 +456,7 @@ class PlayScene extends Phaser.Scene {
 
   preload() {
     const today = getEffectiveDate();
+    this.load.image("reset", "sprites/reset.png");
     this.load.image("help", "sprites/help.png");
     this.load.json("puzzle", `puzzles/puzzle-${today}.json`);
     plausible("preload");
@@ -492,6 +498,7 @@ class PlayScene extends Phaser.Scene {
     drawCells(n, n - 1, cellGraphics, BLOCK_SIZE * (n + 2))
 
     // Dominoes
+    let dominoSprites = [];
     const dominoGraphics = this.make.graphics({ x: 0, y: 0, add: false });
     for (const pd of puzzle.initial_placed_dominoes) {
       offBoard.add(pd);
@@ -519,17 +526,46 @@ class PlayScene extends Phaser.Scene {
       dominoSprite.setData("board", offBoard);
       dominoSprite.setData("placedDomino", pd);
       this.input.setDraggable(dominoSprite);
+      dominoSprites.push(dominoSprite);
+    }
+
+    // Reset button
+    {
+      let [x, y] = blockIndexToCoord(5, 6);
+      const reset = this.add.image(x, y, "reset").setInteractive();
+      reset.setScale(SCALE);
+      reset.on("pointerup", (e) => {
+        board.reset();
+        offBoard.reset();
+        for (let i = 0; i < puzzle.initial_placed_dominoes.length; i++) {
+          const pd = puzzle.initial_placed_dominoes[i];
+          const dominoSprite = dominoSprites[i];
+          offBoard.add(pd);
+          dominoSprite.setData("board", offBoard);
+          dominoSprite.setData("placedDomino", pd);
+          let [x, y] = blockIndexToCoord(
+            pd.i + 1,
+            pd.j,
+            BLOCK_SIZE * (n + 2) + board_y_offset
+          );
+          dominoSprite.x = x - CELL_SIZE / 2;
+          dominoSprite.y = y - CELL_SIZE / 2;
+        }
+      });
+      this.reset = reset;
     }
 
     // Help button
-    let [x, y] = blockIndexToCoord(5, 0);
-    const help = this.add.image(x, y, "help").setInteractive();
-    help.setScale(SCALE);
-    help.on("pointerup", (e) => {
-      this.scene.setVisible(false, "PlayScene");
-      this.scene.launch("MenuScene");
-      this.scene.pause();
-    });
+    {
+      let [x, y] = blockIndexToCoord(5, 0);
+      const help = this.add.image(x, y, "help").setInteractive();
+      help.setScale(SCALE);
+      help.on("pointerup", (e) => {
+        this.scene.setVisible(false, "PlayScene");
+        this.scene.launch("MenuScene");
+        this.scene.pause();
+      });
+    }
 
     this.input.on(
       "dragstart",
@@ -596,6 +632,8 @@ class PlayScene extends Phaser.Scene {
           cellGraphics.visible = false;
           lightPathGraphics.visible = true;
           gameOver = true;
+          // hide reset button
+          this.reset.setVisible(false);
           // disable dragging
           let images = this.children.list.filter(
             (x) => x instanceof Phaser.GameObjects.Image
