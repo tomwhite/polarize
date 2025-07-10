@@ -268,16 +268,16 @@ function drawTitle(scene) {
     .setOrigin(0.5);
 }
 
-function drawText(scene, text, x, y) {
-  const TEXT_STYLE_12_PT = {
+function drawText(scene, text, x, y, fontSize = 12) {
+  const textStyle = {
     fontFamily: "Arial",
-    fontSize: 12 * SCALE,
-    color: "white", // TODO
+    fontSize: fontSize * SCALE,
+    color: "white",
     padding: {
       bottom: 2,
     },
   };
-  scene.add.text(x, y, text, TEXT_STYLE_12_PT).setOrigin(0.5);
+  scene.add.text(x, y, text, textStyle).setOrigin(0.5);
 }
 
 function drawFilter(graphics, filter, dx, dy) {
@@ -482,6 +482,37 @@ function saveSolved() {
   }
 }
 
+function getStats() {
+  const playedHistoryJson = localStorage.getItem("polarizePlayedHistory");
+  const playedHistory =
+    playedHistoryJson == null
+      ? []
+      : Array.from(new Set(JSON.parse(playedHistoryJson))).sort();
+  const played = Array.from(new Set(playedHistory)).length;
+  console.log(`Played: ${played}`);
+
+  const solvedHistoryJson = localStorage.getItem("polarizeSolvedHistory");
+  const solvedHistory =
+    solvedHistoryJson == null
+      ? []
+      : Array.from(new Set(JSON.parse(solvedHistoryJson))).sort();
+  const solved = Array.from(new Set(solvedHistory)).length;
+  console.log(`Solved: ${solved}`);
+
+  let currentStreak = 0;
+  Array.from(new Set(solvedHistory))
+    .sort()
+    .reverse()
+    .map((d) => new Date(d))
+    .forEach((d, i) => {
+      if (new Date(today) - d === i * 60 * 60 * 24 * 1000) {
+        currentStreak++;
+      }
+    });
+  console.log(`Streak: ${currentStreak}`);
+  return { played: played, solved: solved, currentStreak: currentStreak };
+}
+
 // Scenes
 
 class PlayScene extends Phaser.Scene {
@@ -666,6 +697,56 @@ class PlayScene extends Phaser.Scene {
             image.input ? this.input.setDraggable(image, false) : null
           );
           saveSolved();
+          const stats = getStats();
+          drawText(
+            this,
+            stats.played,
+            BLOCK_SIZE * 1.5,
+            BLOCK_SIZE * (n + 2) + BLOCK_SIZE / 2 + board_y_offset,
+            24
+          );
+          drawText(
+            this,
+            "Played",
+            BLOCK_SIZE * 1.5,
+            BLOCK_SIZE * (n + 2) + BLOCK_SIZE + board_y_offset,
+            10
+          );
+          drawText(
+            this,
+            stats.solved,
+            BLOCK_SIZE * 3,
+            BLOCK_SIZE * (n + 2) + BLOCK_SIZE / 2 + board_y_offset,
+            24
+          );
+          drawText(
+            this,
+            "Solved",
+            BLOCK_SIZE * 3,
+            BLOCK_SIZE * (n + 2) + BLOCK_SIZE + board_y_offset,
+            10
+          );
+          drawText(
+            this,
+            stats.currentStreak,
+            BLOCK_SIZE * 4.5,
+            BLOCK_SIZE * (n + 2) + BLOCK_SIZE / 2 + board_y_offset,
+            24
+          );
+          drawText(
+            this,
+            "Current",
+            BLOCK_SIZE * 4.5,
+            BLOCK_SIZE * (n + 2) + BLOCK_SIZE + board_y_offset,
+            10
+          );
+          drawText(
+            this,
+            "Streak",
+            BLOCK_SIZE * 4.5,
+            BLOCK_SIZE * (n + 2) + BLOCK_SIZE * 1.3 + board_y_offset,
+            10
+          );
           plausible("solved");
         }
       },
