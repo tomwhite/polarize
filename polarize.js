@@ -449,6 +449,39 @@ function getEffectiveDate() {
   return dateParam ? dateParam : formatDate(new Date());
 }
 
+// Events
+
+const today = getEffectiveDate();
+
+function savePlayed() {
+  const solvedHistoryJson = localStorage.getItem("polarizeSolvedHistory");
+  const solvedHistory =
+    solvedHistoryJson == null
+      ? []
+      : Array.from(new Set(JSON.parse(solvedHistoryJson))).sort();
+  const playedHistoryJson = localStorage.getItem("polarizePlayedHistory");
+  const playedHistory =
+    playedHistoryJson == null
+      ? solvedHistory // init from solved history
+      : Array.from(new Set(JSON.parse(playedHistoryJson))).sort();
+  if (!playedHistory.includes(today)) {
+    playedHistory.push(today);
+    localStorage.setItem("polarizePlayedHistory", JSON.stringify(playedHistory));
+  }
+}
+
+function saveSolved() {
+  const solvedHistoryJson = localStorage.getItem("polarizeSolvedHistory");
+  const solvedHistory =
+    solvedHistoryJson == null
+      ? []
+      : Array.from(new Set(JSON.parse(solvedHistoryJson))).sort();
+  if (!solvedHistory.includes(today)) {
+    solvedHistory.push(today);
+    localStorage.setItem("polarizeSolvedHistory", JSON.stringify(solvedHistory));
+  }
+}
+
 // Scenes
 
 class PlayScene extends Phaser.Scene {
@@ -457,10 +490,10 @@ class PlayScene extends Phaser.Scene {
   }
 
   preload() {
-    const today = getEffectiveDate();
     this.load.image("reset", "sprites/reset.png");
     this.load.image("help", "sprites/help.png");
     this.load.json("puzzle", `puzzles/puzzle-${today}.json`);
+    savePlayed(); // assume played if loaded today's puzzle
     plausible("preload");
   }
 
@@ -632,6 +665,7 @@ class PlayScene extends Phaser.Scene {
           images.forEach((image) =>
             image.input ? this.input.setDraggable(image, false) : null
           );
+          saveSolved();
           plausible("solved");
         }
       },
