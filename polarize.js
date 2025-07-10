@@ -300,7 +300,7 @@ function drawFilter(graphics, filter, dx, dy) {
   }
 }
 
-function drawDomino(graphics, domino) {
+function drawDomino(graphics, domino, dominoName) {
   const OFF1 = BLOCK_H - FILTER_R;
   const OFF2 = BLOCK_H + FILTER_R;
 
@@ -327,6 +327,12 @@ function drawDomino(graphics, domino) {
   // filters
   drawFilter(graphics, domino.filter1, 0, 0);
   drawFilter(graphics, domino.filter2, dx, dy);
+
+  if (domino.orientation == Orientation.H) {
+    graphics.generateTexture(dominoName, BLOCK_SIZE * 2, BLOCK_SIZE);
+  } else {
+    graphics.generateTexture(dominoName, BLOCK_SIZE, BLOCK_SIZE * 2);
+  }
 }
 
 // Used only for help pages
@@ -343,7 +349,6 @@ function drawHorizonatalLightSourceAndSpot(n, graphics, light, board_y_offset) {
 function drawHorizontalLightPath(n, graphics, pathsHorizontal, board_y_offset) {
   for (let i = 0; i < n + 1; i++) {
     const colour = light_to_colour(pathsHorizontal[i]);
-    // TODO: can we change j + 1 to j?
     const [x0, y0] = blockIndexToCoord(i, 1, board_y_offset);
     const [x1, y1] = blockIndexToCoord(i + 1, 1, board_y_offset);
     graphics.lineStyle(LIGHT_WIDTH, colour);
@@ -353,7 +358,6 @@ function drawHorizontalLightPath(n, graphics, pathsHorizontal, board_y_offset) {
 
 function drawLightSourcesAndSpots(n, graphics, puzzle, board_y_offset) {
   li = puzzle.lights;
-  // TODO: make the following more consistent
   let i = 0;
   for (let j = 0; j < n; j++) {
     let [x, y] = blockIndexToCoord(i, j, board_y_offset + BLOCK_SIZE);
@@ -391,7 +395,6 @@ function drawLightPaths(n, graphics, solution, board_y_offset) {
       for (let j = 0; j < n; j++) {
         const colour = light_to_colour(pathsHorizontal[j][i]);
         if (colour == c) {
-          // TODO: can we change j + 1 to j?
           const [x0, y0] = blockIndexToCoord(i, j + 1, board_y_offset);
           const [x1, y1] = blockIndexToCoord(i + 1, j + 1, board_y_offset);
           graphics.lineStyle(LIGHT_WIDTH, colour);
@@ -403,7 +406,6 @@ function drawLightPaths(n, graphics, solution, board_y_offset) {
       for (let j = 0; j < n + 1; j++) {
         const colour = light_to_colour(pathsVertical[j][i]);
         if (colour == c) {
-          // TODO: can we change i + 1 to i?
           const [x0, y0] = blockIndexToCoord(i + 1, j, board_y_offset);
           const [x1, y1] = blockIndexToCoord(i + 1, j + 1, board_y_offset);
           graphics.lineStyle(LIGHT_WIDTH, colour);
@@ -464,7 +466,6 @@ class PlayScene extends Phaser.Scene {
 
   create() {
     const puzzle = new Puzzle(this.cache.json.get("puzzle"));
-    console.log(puzzle);
     const solution = puzzle.solution;
     const n = puzzle.n;
     const board = new Board();
@@ -472,7 +473,7 @@ class PlayScene extends Phaser.Scene {
     const board_y_offset = BLOCK_SIZE;
 
     let gameOver = false;
-    //   let seenFirstMove = false;
+    let seenFirstMove = false;
 
     // Title
     drawTitle(this);
@@ -480,10 +481,6 @@ class PlayScene extends Phaser.Scene {
     // Lights
     const lightsGraphics = this.add.graphics();
     drawLightSourcesAndSpots(n, lightsGraphics, puzzle, board_y_offset);
-
-    //   // Board lines
-    //   const boardGraphics = this.add.graphics();
-    //   drawBoardLines(n, boardGraphics, board_y_offset);
 
     // Light paths
     const lightPathGraphics = this.add.graphics();
@@ -503,16 +500,9 @@ class PlayScene extends Phaser.Scene {
     for (const pd of puzzle.initial_placed_dominoes) {
       offBoard.add(pd);
       const domino = pd.domino;
-      drawDomino(dominoGraphics, domino);
       const dominoName = `domino_${domino.value}`;
-      // TODO: make this a bit more concise
-      if (domino.orientation == Orientation.H) {
-        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE * 2, BLOCK_SIZE);
-      } else {
-        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE, BLOCK_SIZE * 2);
-      }
+      drawDomino(dominoGraphics, domino, dominoName);
 
-      // TODO: arithmetic is a mess here again
       let [x, y] = blockIndexToCoord(
         pd.i + 1,
         pd.j,
@@ -625,9 +615,10 @@ class PlayScene extends Phaser.Scene {
           gameObject.x = gameObject.input.dragStartX;
           gameObject.y = gameObject.input.dragStartY;
         }
-        console.log(board.values);
-        console.log(board.lights());
-        console.log(offBoard.values);
+        if (!seenFirstMove) {
+          // saveEvent("firstMove");
+          seenFirstMove = true;
+        }
         if (JSON.stringify(board.lights()) == JSON.stringify(puzzle.lights)) {
           cellGraphics.visible = false;
           lightPathGraphics.visible = true;
@@ -660,16 +651,17 @@ class MenuScene extends Phaser.Scene {
     // Title
     drawTitle(this);
 
-    // let [x, y] = blockIndexToCoord(5, 0);
-    // const close = this.add.image(x, y, "close").setInteractive();
-    // close.setScale(SCALE);
-    // close.on("pointerup", (e) => {
-    //   this.scene.resume("PlayScene");
-    //   this.scene.stop();
-    //   this.scene.setVisible(true, "PlayScene");
-    // });
-
     let y_offset = BLOCK_SIZE * 2;
+    this.add
+      .text(SCREEN_WIDTH / 2, y_offset, "Play", BUTTON_STYLE)
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerup", (e) => {
+        this.scene.resume("PlayScene");
+        this.scene.stop();
+        this.scene.setVisible(true, "PlayScene");
+      });
+    y_offset += BLOCK_SIZE * 1.5;
     this.add
       .text(SCREEN_WIDTH / 2, y_offset, "How to play", BUTTON_STYLE)
       .setOrigin(0.5)
@@ -797,9 +789,7 @@ class HowToPlayScene2 extends Phaser.Scene {
 
   create() {
     const puzzle = new Puzzle(this.cache.json.get("helpPuzzle"));
-    console.log(puzzle);
     const solution = puzzle.solution;
-    console.log(puzzle.solution.placedDominoes);
     const n = puzzle.n;
 
     let board_y_offset = BLOCK_SIZE;
@@ -827,16 +817,9 @@ class HowToPlayScene2 extends Phaser.Scene {
     const dominoGraphics = this.make.graphics({ x: 0, y: 0, add: false });
     for (const pd of solution.placedDominoes) {
       const domino = pd.domino;
-      drawDomino(dominoGraphics, domino);
       const dominoName = `domino_${domino.value}`;
-      // TODO: make this a bit more concise
-      if (domino.orientation == Orientation.H) {
-        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE * 2, BLOCK_SIZE);
-      } else {
-        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE, BLOCK_SIZE * 2);
-      }
+      drawDomino(dominoGraphics, domino, dominoName);
 
-      // TODO: arithmetic is a mess here again
       let [x, y] = blockIndexToCoord(
         pd.i + 1,
         pd.j,
@@ -872,8 +855,9 @@ class HowToPlayScene2 extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerup", (e) => {
-        this.scene.launch("PlayScene");
+        this.scene.resume("PlayScene");
         this.scene.stop();
+        this.scene.setVisible(true, "PlayScene");
       });
   }
 }
@@ -930,16 +914,9 @@ class SolutionScene extends Phaser.Scene {
     const dominoGraphics = this.make.graphics({ x: 0, y: 0, add: false });
     for (const pd of solution.placedDominoes) {
       const domino = pd.domino;
-      drawDomino(dominoGraphics, domino);
       const dominoName = `domino_${domino.value}`;
-      // TODO: make this a bit more concise
-      if (domino.orientation == Orientation.H) {
-        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE * 2, BLOCK_SIZE);
-      } else {
-        dominoGraphics.generateTexture(dominoName, BLOCK_SIZE, BLOCK_SIZE * 2);
-      }
+      drawDomino(dominoGraphics, domino, dominoName);
 
-      // TODO: arithmetic is a mess here again
       let [x, y] = blockIndexToCoord(
         pd.i + 1,
         pd.j,
