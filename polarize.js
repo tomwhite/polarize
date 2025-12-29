@@ -860,6 +860,15 @@ class MenuScene extends Phaser.Scene {
         this.scene.launch("SolutionScene");
         this.scene.stop();
       });
+    y_offset += BLOCK_SIZE * 1.5;
+    this.add
+      .text(SCREEN_WIDTH / 2, y_offset, "About", BUTTON_STYLE)
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerup", (e) => {
+        this.scene.launch("AboutScene");
+        this.scene.stop();
+      });
   }
 }
 
@@ -1113,6 +1122,63 @@ class SolutionScene extends Phaser.Scene {
   }
 }
 
+class AboutScene extends Phaser.Scene {
+  constructor() {
+    super({ key: "AboutScene" });
+  }
+
+  preload() {}
+
+  create() {
+    // Title
+    drawTitle(this);
+
+    let board_y_offset = BLOCK_SIZE;
+    drawText(
+      this,
+      "A light puzzle by Tom White",
+      SCREEN_WIDTH / 2,
+      board_y_offset + BLOCK_H
+    );
+
+    board_y_offset += BLOCK_SIZE;
+    drawText(
+      this,
+      "A new puzzle is released every day",
+      SCREEN_WIDTH / 2,
+      board_y_offset + BLOCK_H
+    );
+
+
+    board_y_offset += BLOCK_SIZE;
+    drawText(
+      this,
+      "Send any comments or feedback to",
+      SCREEN_WIDTH / 2,
+      board_y_offset + BLOCK_H
+    );
+
+    board_y_offset += BLOCK_H;
+    drawText(
+      this,
+      "tom.e.white@gmail.com",
+      SCREEN_WIDTH / 2,
+      board_y_offset + BLOCK_H
+    );
+
+    board_y_offset += 2 * BLOCK_SIZE;
+    this.add
+      .text(SCREEN_WIDTH / 2, board_y_offset, "Done", BUTTON_STYLE)
+      .setOrigin(0.5)
+      .setInteractive()
+      .on("pointerup", (e) => {
+        this.scene.resume("PlayScene");
+        this.scene.stop();
+        this.scene.setVisible(true, "PlayScene");
+      });
+  }
+}
+
 const config = {
   type: Phaser.AUTO,
   width: SCREEN_WIDTH,
@@ -1123,7 +1189,7 @@ const config = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   backgroundColor: BACKGROUND_COLOUR,
-  scene: [PlayScene, MenuScene, HowToPlayScene1, HowToPlayScene2, SolutionScene],
+  scene: [PlayScene, MenuScene, HowToPlayScene1, HowToPlayScene2, SolutionScene, AboutScene],
 };
 
 const game = new Phaser.Game(config);
