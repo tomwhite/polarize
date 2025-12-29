@@ -649,30 +649,30 @@ class PlayScene extends Phaser.Scene {
     }
 
     // Reset button
-    {
-      let [x, y] = blockIndexToCoord(5, 6);
-      const reset = this.add.image(x, y, "reset").setInteractive();
-      reset.setScale(SCALE);
-      reset.on("pointerup", (e) => {
-        board.reset();
-        offBoard.reset();
-        for (let i = 0; i < puzzle.initial_placed_dominoes.length; i++) {
-          const pd = puzzle.initial_placed_dominoes[i];
-          const dominoSprite = dominoSprites[i];
-          offBoard.add(pd);
-          dominoSprite.setData("board", offBoard);
-          dominoSprite.setData("placedDomino", pd);
-          let [x, y] = blockIndexToCoord(
-            pd.i + 1,
-            pd.j,
-            BLOCK_SIZE * (n + 2) + board_y_offset
-          );
-          dominoSprite.x = x - CELL_SIZE / 2;
-          dominoSprite.y = y - CELL_SIZE / 2;
-        }
-      });
-      this.reset = reset;
-    }
+    // {
+    //   let [x, y] = blockIndexToCoord(5, 6);
+    //   const reset = this.add.image(x, y, "reset").setInteractive();
+    //   reset.setScale(SCALE);
+    //   reset.on("pointerup", (e) => {
+    //     board.reset();
+    //     offBoard.reset();
+    //     for (let i = 0; i < puzzle.initial_placed_dominoes.length; i++) {
+    //       const pd = puzzle.initial_placed_dominoes[i];
+    //       const dominoSprite = dominoSprites[i];
+    //       offBoard.add(pd);
+    //       dominoSprite.setData("board", offBoard);
+    //       dominoSprite.setData("placedDomino", pd);
+    //       let [x, y] = blockIndexToCoord(
+    //         pd.i + 1,
+    //         pd.j,
+    //         BLOCK_SIZE * (n + 2) + board_y_offset
+    //       );
+    //       dominoSprite.x = x - CELL_SIZE / 2;
+    //       dominoSprite.y = y - CELL_SIZE / 2;
+    //     }
+    //   });
+    //   this.reset = reset;
+    // }
 
     // Help button
     {
