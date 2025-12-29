@@ -441,6 +441,27 @@ function formatDate(date) {
     .split("T")[0];
 }
 
+// From https://stackoverflow.com/a/2117523
+// prettier-ignore
+function uuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+    }
+
+function getDeviceId() {
+  let deviceId = localStorage.getItem("deviceId");
+  if (deviceId == null) {
+    deviceId = uuidv4();
+    localStorage.setItem("deviceId", deviceId);
+  }
+  return deviceId;
+}
+
+function isLocalhost() {
+  return location.hostname === "localhost" || location.hostname === "127.0.0.1";
+}
+
 // Return "today" in YYYY-MM-DD
 // Allow overriding with url param ?date=YYYY-MM-DD
 function getEffectiveDate() {
@@ -451,7 +472,50 @@ function getEffectiveDate() {
 
 // Events
 
+const firebaseConfig = {
+  apiKey: "AIzaSyCN6Bwe0azsRuU9s4iCFC4e5DguQLlQx2M",
+  authDomain: "polarize-73191.firebaseapp.com",
+  projectId: "polarize-73191",
+  storageBucket: "polarize-73191.firebasestorage.app",
+  messagingSenderId: "1063397566968",
+  appId: "1:1063397566968:web:aa71a02ea4eeea0edd8e0d"
+};
+
+const app = firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
 const today = getEffectiveDate();
+const deviceId = getDeviceId();
+
+function saveEvent(name) {
+  const eventHistoryJson = localStorage.getItem("eventHistory");
+  const eventHistory =
+    eventHistoryJson == null ? [] : JSON.parse(eventHistoryJson);
+  const event = {
+    puzzle: today,
+    name: name,
+    timestamp: Date.now(),
+  };
+  eventHistory.push(event);
+  localStorage.setItem("eventHistory", JSON.stringify(eventHistory));
+
+  event.device = deviceId;
+  if (isLocalhost()) {
+    console.log("Ignoring event on localhost");
+  } else {
+    db.collection("puzzles")
+      .doc(today)
+      .collection("events")
+      .add(event)
+      .then((docRef) => {
+        console.log("Event written to firestore with ID: ", docRef.id);
+      })
+      .catch((error) => {
+        console.error("Error adding event to firestore: ", error);
+      });
+  }
+}
 
 function savePlayed() {
   const solvedHistoryJson = localStorage.getItem("polarizeSolvedHistory");
@@ -526,6 +590,7 @@ class PlayScene extends Phaser.Scene {
     this.load.json("puzzle", `puzzles/puzzle-${today}.json`);
     savePlayed(); // assume played if loaded today's puzzle
     plausible("preload");
+    saveEvent("preload");
   }
 
   create() {
@@ -680,7 +745,7 @@ class PlayScene extends Phaser.Scene {
           gameObject.y = gameObject.input.dragStartY;
         }
         if (!seenFirstMove) {
-          // saveEvent("firstMove");
+          saveEvent("firstMove");
           seenFirstMove = true;
         }
         if (JSON.stringify(board.lights()) == JSON.stringify(puzzle.lights)) {
@@ -748,6 +813,7 @@ class PlayScene extends Phaser.Scene {
             10
           );
           plausible("solved");
+          saveEvent("solved");
         }
       },
       this
