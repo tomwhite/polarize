@@ -753,7 +753,7 @@ class PlayScene extends Phaser.Scene {
           lightPathGraphics.visible = true;
           gameOver = true;
           // hide reset button
-          this.reset.setVisible(false);
+          // this.reset.setVisible(false);
           // disable dragging
           let images = this.children.list.filter(
             (x) => x instanceof Phaser.GameObjects.Image
