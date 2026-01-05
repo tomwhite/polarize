@@ -389,6 +389,9 @@ class Board:
                 and self.placed_dominoes == other.placed_dominoes
             )
         return False
+    
+    def __hash__(self):
+        return hash((self.n, self.values.tobytes(), frozenset(self.placed_dominoes)))
 
     def __str__(self):
         return str(self.values)

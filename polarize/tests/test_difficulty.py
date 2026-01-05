@@ -1,5 +1,5 @@
 from polarize.model import Puzzle
-from polarize.difficulty import num_valid_domino_places, puzzle_features
+from polarize.difficulty import num_candidate_boards, num_valid_domino_places, puzzle_features
 
 
 def test_puzzle_features():
@@ -25,3 +25,11 @@ def test_num_valid_domino_places():
     assert num_valid_domino_places(puzzle, dominoes[1]) == 6
     assert num_valid_domino_places(puzzle, dominoes[2]) == 4
     assert num_valid_domino_places(puzzle, dominoes[3]) == 3
+
+
+def test_num_candidate_boards():
+    # set on 4 Jan 2026
+    puzzle = Puzzle.from_json_str(
+        """{"n": 4, "lights": [2, 1, 1, 0, 2, 1, 1, 1], "dominoes": [2, 4, 2], "initial_placed_dominoes": [{"domino": 2, "i": 1, "j": 0}, {"domino": 2, "i": 1, "j": 1}, {"domino": 4, "i": 0, "j": 0}], "solution": {"values": [[2, 1, 2, 1], [1, 0, 0, 0], [1, 0, 0, 0], [0, 0, 0, 0]], "placed_dominoes": [{"domino": 2, "i": 2, "j": 0}, {"domino": 4, "i": 0, "j": 1}, {"domino": 2, "i": 0, "j": 0}]}}"""
+    )
+    assert num_candidate_boards(puzzle) == 4
