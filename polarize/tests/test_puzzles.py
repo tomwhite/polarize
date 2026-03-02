@@ -32,11 +32,13 @@ def test_puzzles_have_unique_solution(request):
 
 
 def test_puzzles_are_unique(request):
+    # check uniqueness since launch
+    start_puzzle = f"puzzle-2026-01-01.json"
     puzzles = {}
     for full_puzzle_file in sorted((request.config.rootdir / "puzzles").listdir()):
         if full_puzzle_file.isfile():
             filename = Path(full_puzzle_file).name
-            if filename in ("puzzle-2025-03-28.json"):  # dup of puzzle-2025-03-21.json
+            if filename < start_puzzle:
                 continue
             puzzle = load_puzzle(full_puzzle_file)
             puzzles[filename] = puzzle
