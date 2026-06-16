@@ -711,6 +711,68 @@ class PlayScene extends PhaserScene {
       gameObject.y = dragY;
     });
 
+    const showWinState = () => {
+      cellGraphics.visible = false;
+      lightPathGraphics.visible = true;
+      gameOver = true;
+      let images = this.children.list.filter(
+        (x) => x instanceof Phaser.GameObjects.Image
+      );
+      images.forEach((image) =>
+        image.input ? this.input.setDraggable(image, false) : null
+      );
+      const stats = getStats();
+      drawText(
+        this,
+        stats.played,
+        BLOCK_SIZE * 1.5,
+        BLOCK_SIZE * (n + 2) + BLOCK_SIZE / 2 + board_y_offset,
+        24
+      );
+      drawText(
+        this,
+        "Played",
+        BLOCK_SIZE * 1.5,
+        BLOCK_SIZE * (n + 2) + BLOCK_SIZE + board_y_offset,
+        10
+      );
+      drawText(
+        this,
+        stats.solved,
+        BLOCK_SIZE * 3,
+        BLOCK_SIZE * (n + 2) + BLOCK_SIZE / 2 + board_y_offset,
+        24
+      );
+      drawText(
+        this,
+        "Solved",
+        BLOCK_SIZE * 3,
+        BLOCK_SIZE * (n + 2) + BLOCK_SIZE + board_y_offset,
+        10
+      );
+      drawText(
+        this,
+        stats.currentStreak,
+        BLOCK_SIZE * 4.5,
+        BLOCK_SIZE * (n + 2) + BLOCK_SIZE / 2 + board_y_offset,
+        24
+      );
+      drawText(
+        this,
+        "Current",
+        BLOCK_SIZE * 4.5,
+        BLOCK_SIZE * (n + 2) + BLOCK_SIZE + board_y_offset,
+        10
+      );
+      drawText(
+        this,
+        "Streak",
+        BLOCK_SIZE * 4.5,
+        BLOCK_SIZE * (n + 2) + BLOCK_SIZE * 1.3 + board_y_offset,
+        10
+      );
+    };
+
     this.input.on(
       "dragend",
       function (pointer, gameObject, dropped) {
@@ -759,75 +821,35 @@ class PlayScene extends PhaserScene {
           seenFirstMove = true;
         }
         if (JSON.stringify(board.lights()) == JSON.stringify(puzzle.lights)) {
-          cellGraphics.visible = false;
-          lightPathGraphics.visible = true;
-          gameOver = true;
-          // hide reset button
-          // this.reset.setVisible(false);
-          // disable dragging
-          let images = this.children.list.filter(
-            (x) => x instanceof Phaser.GameObjects.Image
-          );
-          images.forEach((image) =>
-            image.input ? this.input.setDraggable(image, false) : null
-          );
           saveSolved();
-          const stats = getStats();
-          drawText(
-            this,
-            stats.played,
-            BLOCK_SIZE * 1.5,
-            BLOCK_SIZE * (n + 2) + BLOCK_SIZE / 2 + board_y_offset,
-            24
-          );
-          drawText(
-            this,
-            "Played",
-            BLOCK_SIZE * 1.5,
-            BLOCK_SIZE * (n + 2) + BLOCK_SIZE + board_y_offset,
-            10
-          );
-          drawText(
-            this,
-            stats.solved,
-            BLOCK_SIZE * 3,
-            BLOCK_SIZE * (n + 2) + BLOCK_SIZE / 2 + board_y_offset,
-            24
-          );
-          drawText(
-            this,
-            "Solved",
-            BLOCK_SIZE * 3,
-            BLOCK_SIZE * (n + 2) + BLOCK_SIZE + board_y_offset,
-            10
-          );
-          drawText(
-            this,
-            stats.currentStreak,
-            BLOCK_SIZE * 4.5,
-            BLOCK_SIZE * (n + 2) + BLOCK_SIZE / 2 + board_y_offset,
-            24
-          );
-          drawText(
-            this,
-            "Current",
-            BLOCK_SIZE * 4.5,
-            BLOCK_SIZE * (n + 2) + BLOCK_SIZE + board_y_offset,
-            10
-          );
-          drawText(
-            this,
-            "Streak",
-            BLOCK_SIZE * 4.5,
-            BLOCK_SIZE * (n + 2) + BLOCK_SIZE * 1.3 + board_y_offset,
-            10
-          );
+          showWinState();
           plausible("solved");
           saveEvent("solved");
         }
       },
       this
     );
+
+    // Restore solved state if puzzle was already completed today
+    if (getHistory("polarizeSolvedHistory").includes(today)) {
+      const spritesByValue = new Map();
+      for (const sprite of dominoSprites) {
+        const val = sprite.getData("domino").value;
+        if (!spritesByValue.has(val)) spritesByValue.set(val, []);
+        spritesByValue.get(val).push(sprite);
+      }
+      for (const pd of puzzle.solution.placedDominoes) {
+        board.add(pd);
+        const sprite = spritesByValue.get(pd.domino.value)?.shift();
+        if (sprite) {
+          sprite.x = (pd.i + 1) * BLOCK_SIZE;
+          sprite.y = (pd.j + 2) * BLOCK_SIZE;
+          sprite.setData("board", board);
+          sprite.setData("placedDomino", pd);
+        }
+      }
+      showWinState();
+    }
   }
 }
 
