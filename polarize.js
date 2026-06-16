@@ -431,6 +431,17 @@ function drawCells(n, m, graphics, board_y_offset = BLOCK_SIZE) {
   }
 }
 
+function drawPlacedDominoes(scene, placedDominoes, board_y_offset) {
+  const dominoGraphics = scene.make.graphics({ x: 0, y: 0, add: false });
+  for (const pd of placedDominoes) {
+    const domino = pd.domino;
+    const dominoName = `domino_${domino.value}`;
+    drawDomino(dominoGraphics, domino, dominoName);
+    const [x, y] = blockIndexToCoord(pd.i + 1, pd.j, BLOCK_SIZE + board_y_offset);
+    scene.add.image(x - CELL_SIZE / 2, y - CELL_SIZE / 2, dominoName).setOrigin(0, 0);
+  }
+}
+
 // Utility functions
 
 // Format a date in ISO format (YYYY-MM-DD) according to local time
@@ -527,17 +538,16 @@ function saveEvent(name) {
   }
 }
 
+function getHistory(key) {
+  const json = localStorage.getItem(key);
+  return json == null ? [] : Array.from(new Set(JSON.parse(json))).sort();
+}
+
 function savePlayed() {
-  const solvedHistoryJson = localStorage.getItem("polarizeSolvedHistory");
-  const solvedHistory =
-    solvedHistoryJson == null
-      ? []
-      : Array.from(new Set(JSON.parse(solvedHistoryJson))).sort();
-  const playedHistoryJson = localStorage.getItem("polarizePlayedHistory");
-  const playedHistory =
-    playedHistoryJson == null
-      ? solvedHistory // init from solved history
-      : Array.from(new Set(JSON.parse(playedHistoryJson))).sort();
+  // init from solved history if played history has never been set
+  const playedHistory = localStorage.getItem("polarizePlayedHistory") !== null
+    ? getHistory("polarizePlayedHistory")
+    : getHistory("polarizeSolvedHistory");
   if (!playedHistory.includes(today)) {
     playedHistory.push(today);
     localStorage.setItem("polarizePlayedHistory", JSON.stringify(playedHistory));
@@ -545,11 +555,7 @@ function savePlayed() {
 }
 
 function saveSolved() {
-  const solvedHistoryJson = localStorage.getItem("polarizeSolvedHistory");
-  const solvedHistory =
-    solvedHistoryJson == null
-      ? []
-      : Array.from(new Set(JSON.parse(solvedHistoryJson))).sort();
+  const solvedHistory = getHistory("polarizeSolvedHistory");
   if (!solvedHistory.includes(today)) {
     solvedHistory.push(today);
     localStorage.setItem("polarizeSolvedHistory", JSON.stringify(solvedHistory));
@@ -557,19 +563,11 @@ function saveSolved() {
 }
 
 function getStats() {
-  const playedHistoryJson = localStorage.getItem("polarizePlayedHistory");
-  const playedHistory =
-    playedHistoryJson == null
-      ? []
-      : Array.from(new Set(JSON.parse(playedHistoryJson))).sort();
+  const playedHistory = getHistory("polarizePlayedHistory");
   const played = Array.from(new Set(playedHistory)).length;
   console.log(`Played: ${played}`);
 
-  const solvedHistoryJson = localStorage.getItem("polarizeSolvedHistory");
-  const solvedHistory =
-    solvedHistoryJson == null
-      ? []
-      : Array.from(new Set(JSON.parse(solvedHistoryJson))).sort();
+  const solvedHistory = getHistory("polarizeSolvedHistory");
   const solved = Array.from(new Set(solvedHistory)).length;
   console.log(`Solved: ${solved}`);
 
@@ -1016,24 +1014,7 @@ class HowToPlayScene2 extends PhaserScene {
     drawLightPaths(n, lightPathGraphics, solution, board_y_offset);
 
     // Dominoes
-    const dominoGraphics = this.make.graphics({ x: 0, y: 0, add: false });
-    for (const pd of solution.placedDominoes) {
-      const domino = pd.domino;
-      const dominoName = `domino_${domino.value}`;
-      drawDomino(dominoGraphics, domino, dominoName);
-
-      let [x, y] = blockIndexToCoord(
-        pd.i + 1,
-        pd.j,
-        BLOCK_SIZE + board_y_offset
-      );
-      const dominoSprite = this.add.image(
-        x - CELL_SIZE / 2,
-        y - CELL_SIZE / 2,
-        dominoName
-      );
-      dominoSprite.setOrigin(0, 0);
-    }
+    drawPlacedDominoes(this, solution.placedDominoes, board_y_offset);
 
     board_y_offset += (n + 1.5) * BLOCK_SIZE;
     drawText(
@@ -1113,24 +1094,7 @@ class SolutionScene extends PhaserScene {
     drawLightPaths(n, lightPathGraphics, solution, board_y_offset);
 
     // Dominoes
-    const dominoGraphics = this.make.graphics({ x: 0, y: 0, add: false });
-    for (const pd of solution.placedDominoes) {
-      const domino = pd.domino;
-      const dominoName = `domino_${domino.value}`;
-      drawDomino(dominoGraphics, domino, dominoName);
-
-      let [x, y] = blockIndexToCoord(
-        pd.i + 1,
-        pd.j,
-        BLOCK_SIZE + board_y_offset
-      );
-      const dominoSprite = this.add.image(
-        x - CELL_SIZE / 2,
-        y - CELL_SIZE / 2,
-        dominoName
-      );
-      dominoSprite.setOrigin(0, 0);
-    }
+    drawPlacedDominoes(this, solution.placedDominoes, board_y_offset);
   }
 }
 
