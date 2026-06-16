@@ -481,12 +481,14 @@ const firebaseConfig = {
   appId: "1:1063397566968:web:aa71a02ea4eeea0edd8e0d"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
+let db;
+if (typeof firebase !== 'undefined') {
+  const app = firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+}
 
-const db = firebase.firestore();
-
-const today = getEffectiveDate();
-const deviceId = getDeviceId();
+const today = typeof window !== 'undefined' ? getEffectiveDate() : null;
+const deviceId = typeof window !== 'undefined' ? getDeviceId() : null;
 
 function saveEvent(name) {
   const eventHistoryJson = localStorage.getItem("eventHistory");
@@ -579,7 +581,9 @@ function getStats() {
 
 // Scenes
 
-class PlayScene extends Phaser.Scene {
+const PhaserScene = typeof Phaser !== 'undefined' ? Phaser.Scene : class {};
+
+class PlayScene extends PhaserScene {
   constructor() {
     super({ key: "PlayScene" });
   }
@@ -821,7 +825,7 @@ class PlayScene extends Phaser.Scene {
   }
 }
 
-class MenuScene extends Phaser.Scene {
+class MenuScene extends PhaserScene {
   constructor() {
     super({ key: "MenuScene" });
   }
@@ -872,7 +876,7 @@ class MenuScene extends Phaser.Scene {
   }
 }
 
-class HowToPlayScene1 extends Phaser.Scene {
+class HowToPlayScene1 extends PhaserScene {
   constructor() {
     super({ key: "HowToPlayScene1" });
   }
@@ -968,7 +972,7 @@ class HowToPlayScene1 extends Phaser.Scene {
   }
 }
 
-class HowToPlayScene2 extends Phaser.Scene {
+class HowToPlayScene2 extends PhaserScene {
   constructor() {
     super({ key: "HowToPlayScene2" });
   }
@@ -1052,7 +1056,7 @@ class HowToPlayScene2 extends Phaser.Scene {
   }
 }
 
-class SolutionScene extends Phaser.Scene {
+class SolutionScene extends PhaserScene {
   constructor() {
     super({ key: "SolutionScene" });
   }
@@ -1122,7 +1126,7 @@ class SolutionScene extends Phaser.Scene {
   }
 }
 
-class AboutScene extends Phaser.Scene {
+class AboutScene extends PhaserScene {
   constructor() {
     super({ key: "AboutScene" });
   }
@@ -1179,17 +1183,23 @@ class AboutScene extends Phaser.Scene {
   }
 }
 
-const config = {
-  type: Phaser.AUTO,
-  width: SCREEN_WIDTH,
-  height: SCREEN_HEIGHT,
-  scale: {
-    parent: "phaser-game",
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-  },
-  backgroundColor: BACKGROUND_COLOUR,
-  scene: [PlayScene, MenuScene, HowToPlayScene1, HowToPlayScene2, SolutionScene, AboutScene],
-};
+if (typeof Phaser !== 'undefined') {
+  const config = {
+    type: Phaser.AUTO,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+    scale: {
+      parent: "phaser-game",
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+    backgroundColor: BACKGROUND_COLOUR,
+    scene: [PlayScene, MenuScene, HowToPlayScene1, HowToPlayScene2, SolutionScene, AboutScene],
+  };
 
-const game = new Phaser.Game(config);
+  const game = new Phaser.Game(config);
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { Filter, Orientation, ALL_DOMINOES, Domino, PlacedDomino, Board, Puzzle, bitwise_count, zeros2D };
+}
