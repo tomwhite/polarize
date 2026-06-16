@@ -41,18 +41,18 @@ const BUTTON_STYLE = {
 
 // Model classes
 
-const Filter = Object.freeze({
+export const Filter = Object.freeze({
   // values from here are used in the board values
   POS_45: 1,
   NEG_45: 2,
 });
 
-const Orientation = Object.freeze({
+export const Orientation = Object.freeze({
   H: Symbol("H"),
   V: Symbol("V"),
 });
 
-class Domino {
+export class Domino {
   constructor(value, orientation, filter1, filter2) {
     this.value = value;
     this.orientation = orientation;
@@ -62,7 +62,7 @@ class Domino {
 }
 
 // order is the same as Python
-const ALL_DOMINOES = [
+export const ALL_DOMINOES = [
   new Domino(0, Orientation.H, Filter.POS_45, Filter.POS_45),
   new Domino(1, Orientation.H, Filter.POS_45, Filter.NEG_45),
   new Domino(2, Orientation.H, Filter.NEG_45, Filter.POS_45),
@@ -73,7 +73,7 @@ const ALL_DOMINOES = [
   new Domino(7, Orientation.V, Filter.NEG_45, Filter.NEG_45),
 ];
 
-class Puzzle {
+export class Puzzle {
   constructor(data) {
     this.n = data.n;
     this.lights = data.lights;
@@ -92,7 +92,7 @@ class Puzzle {
   }
 }
 
-class PlacedDomino {
+export class PlacedDomino {
   constructor(domino, i, j) {
     this.domino = domino;
     this.i = i;
@@ -113,7 +113,7 @@ class PlacedDomino {
   }
 }
 
-class Board {
+export class Board {
   // Note: m != n is for offBoard (which isn't square) - so it only supports
   // canAdd, canRemove, but not methods for lights and paths.
   constructor(n = 4, m = 4, values = zeros2D(n, n), placedDominoes = []) {
@@ -223,11 +223,11 @@ class Board {
   }
 }
 
-function zeros2D(m, n) {
+export function zeros2D(m, n) {
   return Array.from(Array(m), () => Array(n).fill(0));
 }
 
-function bitwise_count(n) {
+export function bitwise_count(n) {
   let c = 0;
   while (n) {
     c += n & 1;
@@ -357,7 +357,7 @@ function drawHorizontalLightPath(n, graphics, pathsHorizontal, board_y_offset) {
 }
 
 function drawLightSourcesAndSpots(n, graphics, puzzle, board_y_offset) {
-  li = puzzle.lights;
+  const li = puzzle.lights;
   let i = 0;
   for (let j = 0; j < n; j++) {
     let [x, y] = blockIndexToCoord(i, j, board_y_offset + BLOCK_SIZE);
@@ -435,7 +435,7 @@ function drawCells(n, m, graphics, board_y_offset = BLOCK_SIZE) {
 
 // Format a date in ISO format (YYYY-MM-DD) according to local time
 // From https://stackoverflow.com/a/50130338
-function formatDate(date) {
+export function formatDate(date) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
     .toISOString()
     .split("T")[0];
@@ -1198,8 +1198,4 @@ if (typeof Phaser !== 'undefined') {
   };
 
   const game = new Phaser.Game(config);
-}
-
-if (typeof module !== 'undefined') {
-  module.exports = { Filter, Orientation, ALL_DOMINOES, Domino, PlacedDomino, Board, Puzzle, bitwise_count, zeros2D };
 }
