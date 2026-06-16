@@ -1169,5 +1169,5 @@ if (typeof Phaser !== 'undefined') {
     scene: [PlayScene, MenuScene, HowToPlayScene1, HowToPlayScene2, SolutionScene, AboutScene],
   };
 
-  const game = new Phaser.Game(config);
+  window.game = new Phaser.Game(config);
 }
