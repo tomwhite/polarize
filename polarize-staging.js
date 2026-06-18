@@ -771,6 +771,32 @@ class PlayScene extends PhaserScene {
         BLOCK_SIZE * (n + 2) + BLOCK_SIZE * 1.3 + board_y_offset,
         10
       );
+      this.add.text(
+        SCREEN_WIDTH / 2,
+        BLOCK_SIZE * (n + 2) + BLOCK_SIZE * 2.5 + board_y_offset,
+        'Share',
+        BUTTON_STYLE
+      ).setOrigin(0.5).setInteractive().on('pointerup', async () => {
+        const shareData = {
+          title: 'Polarize',
+          text: `I solved today's Polarize puzzle! Current streak: ${stats.currentStreak}`,
+          url: 'https://tom-e-white.com/polarize/',
+        };
+        if (navigator.canShare) {
+          try {
+            const blob = await fetch('logo.png').then(r => r.blob());
+            const file = new File([blob], 'logo.png', { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              shareData.files = [file];
+            }
+          } catch (_) {}
+        }
+        try {
+          await navigator.share(shareData);
+        } catch (e) {
+          if (e.name !== 'AbortError') console.error(e);
+        }
+      });
     };
 
     this.input.on(
@@ -1176,6 +1202,7 @@ class AboutScene extends PhaserScene {
       });
   }
 }
+
 
 if (typeof Phaser !== 'undefined') {
   const config = {
