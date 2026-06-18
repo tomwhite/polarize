@@ -2,8 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Polarize</title>
-    <script defer data-domain="tom-e-white.com" src="https://plausible.io/js/script.js"></script>
+    <title>Polarize (Staging)</title>
+    <script>
+      window.plausible =
+        window.plausible ||
+        function () {
+          (window.plausible.q = window.plausible.q || []).push(arguments);
+        };
+    </script>
     <script src="//cdn.jsdelivr.net/npm/phaser@v3.87.0/dist/phaser.min.js"></script>
     <style type="text/css">
       body {
@@ -15,7 +21,7 @@
     </style>
   </head>
   <body>
-    <script type="module" src="polarize.js"></script>
+    <script type="module" src="polarize-staging.js"></script>
     <div id="phaser-game"/>
   </body>
 </html>
