@@ -524,7 +524,7 @@ function saveEvent(name) {
   event.device = deviceId;
   if (isLocalhost()) {
     console.log("Ignoring event on localhost");
-  } else {
+  } else if (typeof db !== 'undefined') {
     db.collection("puzzles")
       .doc(today)
       .collection("events")
