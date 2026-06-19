@@ -821,8 +821,8 @@ class PlayScene extends PhaserScene {
           seenFirstMove = true;
         }
         if (JSON.stringify(board.lights()) == JSON.stringify(puzzle.lights)) {
-          showWinState();
           saveSolved();
+          showWinState();
           plausible("solved");
           saveEvent("solved");
         }
