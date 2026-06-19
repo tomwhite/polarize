@@ -6,7 +6,11 @@ const URL = `/?date=${TEST_DATE}`;
 
 // Wait for Phaser to finish loading the puzzle
 async function waitForGame(page) {
-  await page.waitForFunction(() => window.game?.scene?.isActive('PlayScene'));
+  await page.waitForFunction(() => {
+    const scene = window.game?.scene?.getScene('PlayScene');
+    return window.game?.scene?.isActive('PlayScene') &&
+      (scene?.input?._list?.length ?? 0) > 0;
+  });
 }
 
 async function drag(page, fromX, fromY, toX, toY) {
