@@ -564,16 +564,15 @@ function saveSolved() {
 
 function getStats() {
   const playedHistory = getHistory("polarizePlayedHistory");
-  const played = Array.from(new Set(playedHistory)).length;
+  const played = playedHistory.length;
   console.log(`Played: ${played}`);
 
   const solvedHistory = getHistory("polarizeSolvedHistory");
-  const solved = Array.from(new Set(solvedHistory)).length;
+  const solved = solvedHistory.length;
   console.log(`Solved: ${solved}`);
 
   let currentStreak = 0;
-  Array.from(new Set(solvedHistory))
-    .sort()
+  [...solvedHistory]
     .reverse()
     .map((d) => new Date(d))
     .forEach((d, i) => {
