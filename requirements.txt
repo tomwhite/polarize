@@ -1,4 +1,5 @@
 arcade
+firebase-admin
 hypothesis
 numba
 numpy
