@@ -517,6 +517,7 @@ function saveEvent(name) {
     puzzle: today,
     name: name,
     timestamp: Date.now(),
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
   eventHistory.push(event);
   localStorage.setItem("eventHistory", JSON.stringify(eventHistory));
