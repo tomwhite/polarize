@@ -25,6 +25,10 @@ const CELL_COLOUR = 0xb3c6d2; // blue-ish grey
 const LIGHT_COLOUR = 0xffff00; // ELECTRIC_YELLOW
 const DIM_LIGHT_COLOUR = 0xffc40c; // MIKADO_YELLOW
 const DARK_COLOUR = BLACK;
+// From https://sashamaps.net/docs/resources/20-colors/
+const FILTER_POS_45_COLOUR = 0x800000; // maroon
+const FILTER_NEG_45_COLOUR = 0x4363d8; // blue
+
 
 const BUTTON_STYLE = {
   fontFamily: "Arial",
@@ -285,19 +289,23 @@ function drawFilter(graphics, filter, dx, dy) {
   graphics.fillStyle(WHITE);
 
   graphics.fillCircle(BLOCK_H + dx, BLOCK_H + dy, FILTER_R);
-  graphics.strokeCircle(BLOCK_H + dx, BLOCK_H + dy, FILTER_R);
 
   const A = (10 - 3) * SCALE;
   const B = (30 - 3) * SCALE;
   const C = (10 + 3) * SCALE;
   const D = (30 + 3) * SCALE;
   if (filter == Filter.POS_45) {
+    graphics.lineStyle(3 * SCALE, FILTER_POS_45_COLOUR);
     graphics.lineBetween(A + dx, B + dy, B + dx, A + dy);
     graphics.lineBetween(C + dx, D + dy, D + dx, C + dy);
   } else {
+    graphics.lineStyle(3 * SCALE, FILTER_NEG_45_COLOUR);
     graphics.lineBetween(C + dx, A + dy, D + dx, B + dy);
     graphics.lineBetween(A + dx, C + dy, B + dx, D + dy);
   }
+
+  graphics.lineStyle(3 * SCALE, BLACK);
+  graphics.strokeCircle(BLOCK_H + dx, BLOCK_H + dy, FILTER_R);
 }
 
 function drawDomino(graphics, domino, dominoName) {
@@ -517,6 +525,7 @@ function saveEvent(name) {
     puzzle: today,
     name: name,
     timestamp: Date.now(),
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
   eventHistory.push(event);
   localStorage.setItem("eventHistory", JSON.stringify(eventHistory));
