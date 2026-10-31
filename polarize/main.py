@@ -23,7 +23,8 @@ def cli():
 @click.option("--pieces", default=3)
 @click.option("--max-yellow-spots", default=8)  # unlimited
 @click.option("--min-distinct-dominoes", default=1)
-def generate(filename, number, pieces, max_yellow_spots, min_distinct_dominoes):
+@click.option("--min-total-candidate-boards", default=10)
+def generate(filename, number, pieces, max_yellow_spots, min_distinct_dominoes, min_total_candidate_boards):
     """Generate puzzles according to specified criteria"""
 
     if filename is not None and number != 1:
@@ -36,6 +37,7 @@ def generate(filename, number, pieces, max_yellow_spots, min_distinct_dominoes):
             if (
                 features["num_yellow_spots"] <= max_yellow_spots
                 and features["num_distinct_dominoes"] >= min_distinct_dominoes
+                and features["total_candidate_boards"] >= min_total_candidate_boards
             ):
                 break
         console = Console()
